@@ -123,6 +123,10 @@ export const t = {
     clear: 'נקה מפתח',
     saved: 'המפתח נשמר בהצלחה',
     cleared: 'המפתח נמחק',
+    testConnection: 'בדוק חיבור',
+    testing: 'בודק חיבור ל-Gemini AI...',
+    testSuccess: 'החיבור תקין! Gemini AI מוכן ליצירת תוכניות.',
+    testFailed: 'שגיאת חיבור. בדוק שהמפתח תקין ונסה שנית.',
     status: {
       connected: 'מחובר ומוכן ליצירה',
       notConnected: 'לא מוגדר — יש להזין מפתח API',

@@ -9,7 +9,7 @@ import {
   exerciseCard, lessonCard, categoryBar, skeletonCards,
   focusIcon, showToast, showLoading, hideLoading,
 } from './components.js';
-import { generateLesson, getAllLessons, getLessonById, hasApiKey, getApiKey, setApiKey } from './api.js';
+import { generateLesson, getAllLessons, getLessonById, hasApiKey, getApiKey, setApiKey, testConnection } from './api.js';
 
 // =============================
 // HOME VIEW
@@ -406,7 +406,6 @@ export async function initLessonDetail(id) {
 // =============================
 export function renderSettings() {
   const currentKey = getApiKey();
-  const masked = currentKey ? currentKey.slice(0, 8) + '••••••••' + currentKey.slice(-4) : '';
   const isConnected = hasApiKey();
 
   return `
@@ -417,7 +416,7 @@ export function renderSettings() {
         <!-- Connection Status -->
         <div class="card" style="margin-bottom:var(--space-4)">
           <div class="card__body">
-            <div class="settings-status ${isConnected ? 'settings-status--connected' : 'settings-status--disconnected'}">
+            <div id="connection-status" class="settings-status ${isConnected ? 'settings-status--connected' : 'settings-status--disconnected'}">
               <div class="settings-status__dot"></div>
               <span>${isConnected ? t.settings.status.connected : t.settings.status.notConnected}</span>
             </div>
@@ -432,27 +431,30 @@ export function renderSettings() {
                 ${iconKey()}
                 ${t.settings.apiKeyLabel}
               </label>
-              <div style="position:relative">
-                <input
-                  type="password"
-                  id="api-key-input"
-                  class="settings-input"
-                  placeholder="${t.settings.apiKeyPlaceholder}"
-                  value="${currentKey}"
-                  autocomplete="off"
-                  dir="ltr"
-                />
-              </div>
+              <input
+                type="text"
+                id="api-key-input"
+                class="settings-input"
+                placeholder="${t.settings.apiKeyPlaceholder}"
+                value="${currentKey}"
+                autocomplete="off"
+                dir="ltr"
+                spellcheck="false"
+              />
               <p class="settings-help">
                 ${t.settings.apiKeyHelp}
                 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">${t.settings.apiKeyLink}</a>
               </p>
             </div>
 
-            <div style="display:flex;gap:var(--space-2)">
-              <button type="button" id="save-key-btn" class="btn btn--primary" style="flex:1">
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <button type="button" id="save-key-btn" class="btn btn--primary" style="flex:1;min-width:120px">
                 ${iconCheck()}
                 ${t.settings.save}
+              </button>
+              <button type="button" id="test-key-btn" class="btn btn--secondary" style="flex:1;min-width:120px">
+                ${iconArrowRight()}
+                בדוק חיבור
               </button>
               ${currentKey ? `
                 <button type="button" id="clear-key-btn" class="btn btn--ghost">
@@ -461,6 +463,9 @@ export function renderSettings() {
                 </button>
               ` : ''}
             </div>
+
+            <!-- Test result area -->
+            <div id="test-result" style="margin-top:var(--space-3);display:none"></div>
           </div>
         </div>
 
@@ -483,22 +488,28 @@ export function renderSettings() {
 
 export function initSettings() {
   const saveBtn = document.getElementById('save-key-btn');
+  const testBtn = document.getElementById('test-key-btn');
   const clearBtn = document.getElementById('clear-key-btn');
   const clearDataBtn = document.getElementById('clear-data-btn');
   const input = document.getElementById('api-key-input');
+  const testResult = document.getElementById('test-result');
+  const statusEl = document.getElementById('connection-status');
 
+  // Save key
   if (saveBtn && input) {
     saveBtn.addEventListener('click', () => {
       const key = input.value.trim();
       if (key) {
         setApiKey(key);
         showToast(t.settings.saved, 'success');
-        // Re-render to update status
-        setTimeout(() => { window.location.hash = '#/settings'; location.reload(); }, 800);
+        // Update status indicator inline (no reload)
+        if (statusEl) {
+          statusEl.className = 'settings-status settings-status--connected';
+          statusEl.querySelector('span').textContent = t.settings.status.connected;
+        }
       }
     });
 
-    // Also save on Enter
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -507,14 +518,46 @@ export function initSettings() {
     });
   }
 
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      setApiKey('');
-      showToast(t.settings.cleared, 'success');
-      setTimeout(() => { window.location.hash = '#/settings'; location.reload(); }, 800);
+  // Test connection
+  if (testBtn && testResult) {
+    testBtn.addEventListener('click', async () => {
+      // Save key first if entered
+      const key = input.value.trim();
+      if (key) setApiKey(key);
+
+      testResult.style.display = 'block';
+      testResult.innerHTML = '<div style="color:var(--color-text-secondary);font-size:var(--text-sm)">בודק חיבור ל-Gemini AI...</div>';
+      testBtn.disabled = true;
+
+      const result = await testConnection();
+      testBtn.disabled = false;
+
+      if (result.ok) {
+        testResult.innerHTML = '<div style="color:var(--color-success);font-size:var(--text-sm);font-weight:600">החיבור תקין! Gemini AI מוכן ליצירת תוכניות.</div>';
+        if (statusEl) {
+          statusEl.className = 'settings-status settings-status--connected';
+          statusEl.querySelector('span').textContent = t.settings.status.connected;
+        }
+      } else {
+        testResult.innerHTML = '<div style="color:var(--color-error);font-size:var(--text-sm);font-weight:600">שגיאת חיבור: ' + result.error + '<br>בדוק שהמפתח תקין ונסה שנית.</div>';
+      }
     });
   }
 
+  // Clear key
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      setApiKey('');
+      if (input) input.value = '';
+      showToast(t.settings.cleared, 'success');
+      if (statusEl) {
+        statusEl.className = 'settings-status settings-status--disconnected';
+        statusEl.querySelector('span').textContent = t.settings.status.notConnected;
+      }
+    });
+  }
+
+  // Clear data
   if (clearDataBtn) {
     clearDataBtn.addEventListener('click', () => {
       if (confirm(t.settings.clearConfirm)) {

@@ -121,6 +121,36 @@ async function callGemini(targetAge, focusArea, durationMinutes) {
 }
 
 // =============================
+// TEST CONNECTION
+// =============================
+export async function testConnection() {
+  const apiKey = getApiKey();
+  if (!apiKey) return { ok: false, error: 'NO_API_KEY' };
+
+  try {
+    const url = `${GEMINI_URL}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: 'Reply with exactly: OK' }] }],
+        generationConfig: { temperature: 0, maxOutputTokens: 10 },
+      }),
+    });
+
+    if (!response.ok) {
+      return { ok: false, error: `HTTP ${response.status}` };
+    }
+
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    return { ok: true, response: text };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+// =============================
 // PUBLIC API
 // =============================
 export async function generateLesson(targetAge, focusArea, durationMinutes) {
