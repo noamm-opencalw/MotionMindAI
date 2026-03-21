@@ -3,13 +3,17 @@ import {
   heroIllustration, iconTimeSaving, iconCertificate, iconBrain,
   iconArrowRight, iconChevronLeft, iconClock, iconUsers, iconExercise,
   iconInstructor, emptyStateIllustration, iconTarget,
-  iconKey, iconCheck, iconTrash, iconAlert,
+  iconKey, iconCheck, iconTrash, iconAlert, iconEdit, iconMusic, iconDumbbell,
 } from './icons.js';
 import {
   exerciseCard, lessonCard, categoryBar, skeletonCards,
-  focusIcon, showToast, showLoading, hideLoading,
+  focusIcon, equipmentIcon, musicRecommendations,
+  showToast, showLoading, hideLoading,
 } from './components.js';
-import { generateLesson, getAllLessons, getLessonById, hasApiKey, getApiKey, setApiKey, testConnection } from './api.js';
+import {
+  generateLesson, getAllLessons, getLessonById, hasApiKey, getApiKey, setApiKey,
+  testConnection, regenerateExercise, updateExerciseNote, reorderExercises,
+} from './api.js';
 
 // =============================
 // HOME VIEW
@@ -131,11 +135,33 @@ export function renderGenerate() {
             </div>
           </div>
 
-          <!-- Focus Area -->
+          <!-- Equipment (Multi-select) -->
+          <div class="card generate-card">
+            <div class="card__body">
+              <div class="form-group">
+                <label class="form-label">
+                  ${iconDumbbell()}
+                  ${t.generate.equipmentLabel}
+                </label>
+                <p class="form-hint">${t.generate.equipmentHint}</p>
+                <div class="equipment-grid" data-field="equipment">
+                  ${t.equipmentOptions.map(opt => `
+                    <button type="button" class="equipment-card" data-value="${opt.value}">
+                      ${equipmentIcon(opt.icon)}
+                      <span class="equipment-card__label">${opt.label}</span>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Focus Area (Multi-select) -->
           <div class="card generate-card">
             <div class="card__body">
               <div class="form-group">
                 <label class="form-label">${t.generate.focusLabel}</label>
+                <p class="form-hint">${t.generate.focusHint}</p>
                 <div class="focus-grid" data-field="focus">
                   ${t.focusOptions.map(opt => `
                     <button type="button" class="focus-card" data-value="${opt.value}">
@@ -168,6 +194,30 @@ export function renderGenerate() {
             </div>
           </div>
 
+          <!-- Music -->
+          <div class="card generate-card">
+            <div class="card__body">
+              <div class="form-group">
+                <label class="form-label">
+                  ${iconMusic()}
+                  ${t.generate.musicLabel}
+                </label>
+                <div class="form-group" style="margin-top:var(--space-2)">
+                  <label class="form-label-sm">${t.generate.musicStyleLabel}</label>
+                  <div class="pill-group pill-group--wrap" data-field="musicStyle">
+                    ${t.musicStyles.map(opt => `
+                      <button type="button" class="pill ${opt.value === 'none' ? 'active' : ''}" data-value="${opt.value}">${opt.label}</button>
+                    `).join('')}
+                  </div>
+                </div>
+                <div class="form-group" style="margin-top:var(--space-3)">
+                  <label class="form-label-sm">${t.generate.musicCustomLabel}</label>
+                  <input type="text" id="music-custom-input" class="settings-input" style="font-family:var(--font-family);direction:rtl;text-align:right" placeholder="${t.generate.musicCustomPlaceholder}" />
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Submit -->
           <button type="submit" class="btn btn--primary btn--lg btn--full btn--shimmer" id="generate-btn">
             ${iconArrowRight()}
@@ -183,10 +233,16 @@ export function initGenerate() {
   const form = document.getElementById('generate-form');
   if (!form) return;
 
-  const state = { age: null, focus: null, duration: 45 };
+  const state = {
+    age: null,
+    equipment: [],
+    focus: [],
+    duration: 45,
+    musicStyle: 'none',
+  };
 
-  // Pill selectors
-  form.querySelectorAll('.pill-group .pill').forEach(pill => {
+  // Pill selectors (single-select for age and duration)
+  form.querySelectorAll('.pill-group[data-field="age"] .pill, .pill-group[data-field="duration"] .pill').forEach(pill => {
     pill.addEventListener('click', () => {
       const group = pill.closest('[data-field]');
       const field = group.dataset.field;
@@ -201,12 +257,41 @@ export function initGenerate() {
     });
   });
 
-  // Focus cards
+  // Music style selector (single-select)
+  form.querySelectorAll('.pill-group[data-field="musicStyle"] .pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const group = pill.closest('[data-field]');
+      group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      state.musicStyle = pill.dataset.value;
+    });
+  });
+
+  // Equipment cards (multi-select)
+  form.querySelectorAll('.equipment-grid .equipment-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const value = card.dataset.value;
+      card.classList.toggle('active');
+
+      if (card.classList.contains('active')) {
+        if (!state.equipment.includes(value)) state.equipment.push(value);
+      } else {
+        state.equipment = state.equipment.filter(v => v !== value);
+      }
+    });
+  });
+
+  // Focus cards (multi-select)
   form.querySelectorAll('.focus-grid .focus-card').forEach(card => {
     card.addEventListener('click', () => {
-      form.querySelectorAll('.focus-card').forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-      state.focus = card.dataset.value;
+      const value = card.dataset.value;
+      card.classList.toggle('active');
+
+      if (card.classList.contains('active')) {
+        if (!state.focus.includes(value)) state.focus.push(value);
+      } else {
+        state.focus = state.focus.filter(v => v !== value);
+      }
     });
   });
 
@@ -214,7 +299,7 @@ export function initGenerate() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (!state.age || !state.focus) {
+    if (!state.age || state.focus.length === 0) {
       showToast(t.errors.fillAll, 'error');
       return;
     }
@@ -228,7 +313,15 @@ export function initGenerate() {
     showLoading();
 
     try {
-      const lesson = await generateLesson(state.age, state.focus, state.duration);
+      const musicCustom = document.getElementById('music-custom-input')?.value.trim() || '';
+      const lesson = await generateLesson({
+        targetAge: state.age,
+        focusAreas: state.focus,
+        durationMinutes: state.duration,
+        equipment: state.equipment,
+        musicStyle: state.musicStyle,
+        musicCustom,
+      });
       hideLoading();
       showToast(t.toast.success, 'success');
       window.location.hash = `#/lesson/${lesson.id}`;
@@ -321,7 +414,9 @@ export async function initLessonDetail(id) {
   const content = document.getElementById('detail-content');
   if (!content) return;
 
-  try {
+  let editMode = false;
+
+  async function renderDetail() {
     const lesson = await getLessonById(id);
 
     if (!lesson) {
@@ -340,6 +435,21 @@ export async function initLessonDetail(id) {
     const totalDuration = exercises.reduce((sum, e) => sum + e.durationSeconds, 0);
     const totalMin = Math.round(totalDuration / 60);
 
+    // Focus areas display
+    const focusAreas = lesson.focusAreas || [lesson.focusArea];
+    const focusBadges = focusAreas.map(fa => {
+      const name = t.categories[fa] || fa;
+      return `<span>${name}</span>`;
+    }).join(' · ');
+
+    // Equipment display
+    const equipmentDisplay = lesson.equipment && lesson.equipment.length > 0
+      ? `<span class="meta-item">
+          ${iconDumbbell()}
+          <span>${lesson.equipment.join(', ')}</span>
+        </span>`
+      : '';
+
     content.innerHTML = `
       <!-- Header -->
       <div class="card" style="margin-bottom:var(--space-6)">
@@ -352,12 +462,13 @@ export async function initLessonDetail(id) {
             </span>
             <span class="meta-item">
               ${iconTarget()}
-              <span>${t.categories[lesson.focusArea] || lesson.focusArea}</span>
+              <span>${focusBadges}</span>
             </span>
             <span class="meta-item">
               ${iconClock()}
               <span>${lesson.durationMinutes} ${t.detail.minutes}</span>
             </span>
+            ${equipmentDisplay}
             ${lesson.instructor ? `
               <span class="meta-item">
                 ${iconInstructor()}
@@ -369,11 +480,22 @@ export async function initLessonDetail(id) {
         </div>
       </div>
 
-      <!-- Exercises -->
-      <h2 class="section-title">${t.detail.exercisesTitle}</h2>
-      <div class="timeline">
-        ${exercises.map(ex => exerciseCard(ex)).join('')}
+      <!-- Edit Toggle -->
+      <div class="detail-edit-toggle">
+        <h2 class="section-title" style="margin-bottom:0">${t.detail.exercisesTitle}</h2>
+        <button type="button" class="btn btn--secondary btn--sm" id="toggle-edit-btn">
+          ${editMode ? iconCheck() : iconEdit()}
+          ${editMode ? t.detail.doneEditing : t.detail.editExercises}
+        </button>
       </div>
+
+      <!-- Exercises -->
+      <div class="timeline" id="exercises-timeline">
+        ${exercises.map((ex, i) => exerciseCard(ex, i, exercises.length, editMode)).join('')}
+      </div>
+
+      <!-- Music Recommendations -->
+      ${musicRecommendations(lesson.musicRecommendations)}
 
       <!-- Summary -->
       <div class="detail-summary">
@@ -391,6 +513,21 @@ export async function initLessonDetail(id) {
         </div>
       </div>
     `;
+
+    // Bind edit toggle
+    document.getElementById('toggle-edit-btn')?.addEventListener('click', () => {
+      editMode = !editMode;
+      renderDetail();
+    });
+
+    // Bind edit-mode actions
+    if (editMode) {
+      bindEditActions(id, renderDetail);
+    }
+  }
+
+  try {
+    await renderDetail();
   } catch (err) {
     content.innerHTML = `
       <div class="empty-state">
@@ -399,6 +536,74 @@ export async function initLessonDetail(id) {
     `;
     console.error('Load detail error:', err);
   }
+}
+
+function bindEditActions(lessonId, renderDetail) {
+  // Move up
+  document.querySelectorAll('.exercise-move-up').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const exerciseId = Number(btn.dataset.exerciseId);
+      const items = [...document.querySelectorAll('.timeline-item')];
+      const ids = items.map(item => Number(item.dataset.exerciseId));
+      const idx = ids.indexOf(exerciseId);
+      if (idx > 0) {
+        [ids[idx], ids[idx - 1]] = [ids[idx - 1], ids[idx]];
+        await reorderExercises(lessonId, ids);
+        showToast(t.toast.lessonUpdated, 'success');
+        await renderDetail();
+      }
+    });
+  });
+
+  // Move down
+  document.querySelectorAll('.exercise-move-down').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const exerciseId = Number(btn.dataset.exerciseId);
+      const items = [...document.querySelectorAll('.timeline-item')];
+      const ids = items.map(item => Number(item.dataset.exerciseId));
+      const idx = ids.indexOf(exerciseId);
+      if (idx < ids.length - 1) {
+        [ids[idx], ids[idx + 1]] = [ids[idx + 1], ids[idx]];
+        await reorderExercises(lessonId, ids);
+        showToast(t.toast.lessonUpdated, 'success');
+        await renderDetail();
+      }
+    });
+  });
+
+  // Note save on blur
+  document.querySelectorAll('.exercise-note-input').forEach(textarea => {
+    textarea.addEventListener('blur', async () => {
+      const exerciseId = textarea.dataset.exerciseId;
+      const note = textarea.value.trim();
+      await updateExerciseNote(lessonId, exerciseId, note);
+    });
+  });
+
+  // Regenerate exercise
+  document.querySelectorAll('.exercise-regenerate').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const exerciseId = btn.dataset.exerciseId;
+      const textarea = btn.closest('.exercise-card__edit-actions')?.querySelector('.exercise-note-input');
+      const note = textarea?.value.trim() || 'צור תרגיל חלופי דומה';
+
+      btn.disabled = true;
+      btn.innerHTML = `${t.detail.regenerating}`;
+
+      try {
+        // Save note first
+        await updateExerciseNote(lessonId, exerciseId, note);
+        await regenerateExercise(lessonId, exerciseId, note);
+        showToast(t.toast.exerciseRegenerated, 'success');
+        await renderDetail();
+      } catch (err) {
+        showToast(t.errors.regenerateFailed, 'error');
+        btn.disabled = false;
+        btn.innerHTML = `${t.detail.regenerateExercise}`;
+        console.error('Regenerate error:', err);
+      }
+    });
+  });
 }
 
 // =============================
