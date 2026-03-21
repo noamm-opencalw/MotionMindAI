@@ -48,14 +48,33 @@ function getNextId() {
 // =============================
 // GEMINI DIRECT API CALL
 // =============================
-function buildPrompt(targetAge, focusArea, durationMinutes) {
+function buildPrompt({ targetAge, focusAreas, durationMinutes, equipment, musicStyle, musicCustom }) {
+  const equipmentLine = equipment && equipment.length > 0
+    ? `- Available equipment: ${equipment.join(', ')}`
+    : '- Available equipment: none (bodyweight only)';
+
+  const focusLine = Array.isArray(focusAreas)
+    ? `- Focus areas: ${focusAreas.join(', ')}`
+    : `- Focus area: ${focusAreas}`;
+
+  let musicLine = '';
+  if (musicStyle && musicStyle !== 'none') {
+    musicLine = `- Music style for the workout: ${musicStyle}`;
+    if (musicCustom) {
+      musicLine += `\n- Specific songs/artists requested: ${musicCustom}`;
+    }
+    musicLine += `\n- Include a "musicRecommendations" field in the JSON with 3-5 recommended songs (title and artist) matching the workout pace and style. For Hebrew/Israeli music, include original Hebrew names.`;
+  }
+
   return `You are a certified Pilates and Physical Education instructor.
 Generate a structured lesson plan in valid JSON.
 
 Parameters:
 - Target age group: ${targetAge}
-- Focus area: ${focusArea}
+${focusLine}
 - Total duration: ${durationMinutes} minutes
+${equipmentLine}
+${musicLine}
 
 Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
 {
@@ -66,24 +85,68 @@ Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
       "description": "string (in Hebrew)",
       "durationSeconds": number,
       "category": "Warm-Up | Core | Strength | Flexibility | Cool-Down",
-      "coachCues": "string (in Hebrew)"
+      "coachCues": "string (in Hebrew)",
+      "equipment": "string (in Hebrew, which equipment is used, or empty string if none)"
     }
-  ]
+  ]${musicStyle && musicStyle !== 'none' ? `,
+  "musicRecommendations": [
+    {
+      "title": "string",
+      "artist": "string",
+      "tempo": "slow | medium | fast"
+    }
+  ]` : ''}
 }
 
 Rules:
-- IMPORTANT: All text fields (title, name, description, coachCues) MUST be in Hebrew
-- Include 4-7 exercises appropriate for ${targetAge}
+- IMPORTANT: All text fields (title, name, description, coachCues, equipment) MUST be in Hebrew
+- Include 4-8 exercises appropriate for ${targetAge}
 - Total exercise time should fill approximately ${durationMinutes} minutes
 - coachCues should be concise verbal instructions an instructor would say
-- Categories must come from the enum above (keep category values in English)`;
+- Categories must come from the enum above (keep category values in English)
+- Use ONLY the specified equipment; adapt exercises to available tools
+- Incorporate all focus areas into the workout distribution
+- Each exercise must clearly describe proper form and positioning`;
 }
 
-async function callGemini(targetAge, focusArea, durationMinutes) {
+function buildRegeneratePrompt(exercise, note, lessonContext) {
+  return `You are a certified Pilates and Physical Education instructor.
+Regenerate a SINGLE exercise based on the following context and note.
+
+Original exercise:
+- Name: ${exercise.name}
+- Description: ${exercise.description}
+- Category: ${exercise.category}
+- Duration: ${exercise.durationSeconds} seconds
+- Coach Cues: ${exercise.coachCues}
+
+Lesson context:
+- Age group: ${lessonContext.targetAgeGroup}
+- Focus areas: ${lessonContext.focusAreas || lessonContext.focusArea}
+- Equipment: ${lessonContext.equipment ? lessonContext.equipment.join(', ') : 'none'}
+
+User note/request for changes: ${note}
+
+Return ONLY valid JSON for a single exercise (no markdown, no extra text):
+{
+  "name": "string (in Hebrew)",
+  "description": "string (in Hebrew)",
+  "durationSeconds": number,
+  "category": "Warm-Up | Core | Strength | Flexibility | Cool-Down",
+  "coachCues": "string (in Hebrew)",
+  "equipment": "string (in Hebrew, or empty string)"
+}
+
+Rules:
+- IMPORTANT: All text fields MUST be in Hebrew
+- Keep the same category and similar duration unless the note requests otherwise
+- Adapt the exercise based on the user's note
+- Keep category values in English`;
+}
+
+async function callGemini(prompt) {
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('NO_API_KEY');
-
-  const prompt = buildPrompt(targetAge, focusArea, durationMinutes);
 
   const requestBody = {
     contents: [{ parts: [{ text: prompt }] }],
@@ -115,9 +178,7 @@ async function callGemini(targetAge, focusArea, durationMinutes) {
 
   if (!jsonText) throw new Error('Empty response from Gemini');
 
-  // Parse the JSON response
-  const plan = JSON.parse(jsonText);
-  return plan;
+  return JSON.parse(jsonText);
 }
 
 // =============================
@@ -153,28 +214,34 @@ export async function testConnection() {
 // =============================
 // PUBLIC API
 // =============================
-export async function generateLesson(targetAge, focusArea, durationMinutes) {
+export async function generateLesson({ targetAge, focusAreas, durationMinutes, equipment, musicStyle, musicCustom }) {
   // If a backend API is configured, use it
   if (API_BASE) {
     const res = await fetch(`${API_BASE}/api/lessons/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetAge, focusArea, durationMinutes }),
+      body: JSON.stringify({ targetAge, focusArea: focusAreas, durationMinutes }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   }
 
   // Call Gemini directly from the browser
-  const plan = await callGemini(targetAge, focusArea, durationMinutes);
+  const prompt = buildPrompt({ targetAge, focusAreas, durationMinutes, equipment, musicStyle, musicCustom });
+  const plan = await callGemini(prompt);
 
   // Create a full lesson object
   const lesson = {
     id: getNextId(),
     title: plan.title,
     targetAgeGroup: targetAge,
-    focusArea,
+    focusArea: Array.isArray(focusAreas) ? focusAreas[0] : focusAreas,
+    focusAreas: Array.isArray(focusAreas) ? focusAreas : [focusAreas],
     durationMinutes,
+    equipment: equipment || [],
+    musicStyle: musicStyle || 'none',
+    musicCustom: musicCustom || '',
+    musicRecommendations: plan.musicRecommendations || [],
     instructor: { id: 1, name: 'מאמן AI', specialty: 'פילאטיס וחינוך גופני' },
     exercises: (plan.exercises || []).map((ex, i) => ({
       id: Date.now() + i,
@@ -183,6 +250,8 @@ export async function generateLesson(targetAge, focusArea, durationMinutes) {
       durationSeconds: ex.durationSeconds,
       category: ex.category,
       coachCues: ex.coachCues,
+      equipment: ex.equipment || '',
+      note: '',
     })),
   };
 
@@ -191,6 +260,68 @@ export async function generateLesson(targetAge, focusArea, durationMinutes) {
   lessons.push(lesson);
   saveLessonsToStorage(lessons);
 
+  return lesson;
+}
+
+export async function regenerateExercise(lessonId, exerciseId, note) {
+  const lessons = getLessonsFromStorage();
+  const lesson = lessons.find(l => l.id === Number(lessonId));
+  if (!lesson) throw new Error('Lesson not found');
+
+  const exerciseIndex = lesson.exercises.findIndex(e => e.id === Number(exerciseId));
+  if (exerciseIndex === -1) throw new Error('Exercise not found');
+
+  const exercise = lesson.exercises[exerciseIndex];
+  const prompt = buildRegeneratePrompt(exercise, note, lesson);
+  const newExercise = await callGemini(prompt);
+
+  // Replace the exercise
+  lesson.exercises[exerciseIndex] = {
+    ...lesson.exercises[exerciseIndex],
+    name: newExercise.name,
+    description: newExercise.description,
+    durationSeconds: newExercise.durationSeconds,
+    category: newExercise.category,
+    coachCues: newExercise.coachCues,
+    equipment: newExercise.equipment || '',
+    note: '',
+  };
+
+  saveLessonsToStorage(lessons);
+  return lesson;
+}
+
+export async function updateLesson(lessonId, updates) {
+  const lessons = getLessonsFromStorage();
+  const index = lessons.findIndex(l => l.id === Number(lessonId));
+  if (index === -1) throw new Error('Lesson not found');
+
+  lessons[index] = { ...lessons[index], ...updates };
+  saveLessonsToStorage(lessons);
+  return lessons[index];
+}
+
+export async function updateExerciseNote(lessonId, exerciseId, note) {
+  const lessons = getLessonsFromStorage();
+  const lesson = lessons.find(l => l.id === Number(lessonId));
+  if (!lesson) throw new Error('Lesson not found');
+
+  const exercise = lesson.exercises.find(e => e.id === Number(exerciseId));
+  if (!exercise) throw new Error('Exercise not found');
+
+  exercise.note = note;
+  saveLessonsToStorage(lessons);
+  return lesson;
+}
+
+export async function reorderExercises(lessonId, exerciseIds) {
+  const lessons = getLessonsFromStorage();
+  const lesson = lessons.find(l => l.id === Number(lessonId));
+  if (!lesson) throw new Error('Lesson not found');
+
+  const reordered = exerciseIds.map(id => lesson.exercises.find(e => e.id === Number(id))).filter(Boolean);
+  lesson.exercises = reordered;
+  saveLessonsToStorage(lessons);
   return lesson;
 }
 

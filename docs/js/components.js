@@ -3,10 +3,14 @@ import {
   iconClock, iconUsers, iconExercise, iconCoach, iconTarget,
   categoryIcon, categoryColorClass, categoryColor,
   iconCoreFire, iconWave, iconDumbbell, iconSun, iconRehab, iconCoordination,
+  iconBalance, iconCardio, iconPosture,
+  iconBodyweight, iconMat, iconBall, iconBand, iconRoller, iconWeights,
+  iconRing, iconChair, iconWall, iconHoop, iconRope, iconBench,
+  iconMusic, iconRefresh, iconChevronUp, iconChevronDown, iconNote, iconGrip,
 } from './icons.js';
 
 // Exercise card for the timeline
-export function exerciseCard(exercise) {
+export function exerciseCard(exercise, index, total, editMode = false) {
   const colorClass = categoryColorClass(exercise.category);
   const catName = t.categories[exercise.category] || exercise.category;
   const durationMin = Math.round(exercise.durationSeconds / 60);
@@ -14,13 +18,48 @@ export function exerciseCard(exercise) {
     ? `${durationMin} ${t.detail.minutes}`
     : `${exercise.durationSeconds} ${t.detail.seconds}`;
 
+  const equipmentBadge = exercise.equipment
+    ? `<span class="badge badge--primary" style="font-size:var(--text-xs)">${exercise.equipment}</span>`
+    : '';
+
+  const noteDisplay = exercise.note
+    ? `<div class="exercise-card__note">
+        ${iconNote()}
+        <span>${exercise.note}</span>
+      </div>`
+    : '';
+
+  const editActions = editMode ? `
+    <div class="exercise-card__actions">
+      <div class="exercise-card__reorder">
+        ${index > 0 ? `<button type="button" class="btn btn--icon btn--ghost exercise-move-up" data-exercise-id="${exercise.id}" title="${t.detail.moveUp}">
+          ${iconChevronUp()}
+        </button>` : '<div style="width:44px"></div>'}
+        <span class="exercise-card__index">${index + 1}</span>
+        ${index < total - 1 ? `<button type="button" class="btn btn--icon btn--ghost exercise-move-down" data-exercise-id="${exercise.id}" title="${t.detail.moveDown}">
+          ${iconChevronDown()}
+        </button>` : '<div style="width:44px"></div>'}
+      </div>
+      <div class="exercise-card__edit-actions">
+        <div class="exercise-card__note-input">
+          <textarea class="exercise-note-input" data-exercise-id="${exercise.id}" placeholder="${t.detail.notePlaceholder}" rows="2">${exercise.note || ''}</textarea>
+        </div>
+        <button type="button" class="btn btn--secondary btn--sm exercise-regenerate" data-exercise-id="${exercise.id}">
+          ${iconRefresh()}
+          ${t.detail.regenerateExercise}
+        </button>
+      </div>
+    </div>
+  ` : '';
+
   return `
-    <div class="timeline-item">
+    <div class="timeline-item" data-exercise-id="${exercise.id}">
       <div class="timeline-dot" style="background: ${categoryColor(exercise.category)}"></div>
       <div class="card exercise-card">
         <div class="exercise-card__header">
-          <div>
+          <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center">
             <span class="badge badge--${colorClass}">${catName}</span>
+            ${equipmentBadge}
           </div>
           <div class="meta-item">
             ${iconClock()}
@@ -35,6 +74,8 @@ export function exerciseCard(exercise) {
             <span class="exercise-card__cues-text"><strong>${t.detail.coachCues}:</strong> ${exercise.coachCues}</span>
           </div>
         ` : ''}
+        ${noteDisplay}
+        ${editActions}
       </div>
     </div>
   `;
@@ -46,13 +87,26 @@ export function lessonCard(lesson) {
   const catName = t.categories[lesson.focusArea] || lesson.focusArea;
   const exerciseCount = lesson.exercises ? lesson.exercises.length : 0;
 
+  // Show multiple focus badges if available
+  const focusBadges = (lesson.focusAreas && lesson.focusAreas.length > 0)
+    ? lesson.focusAreas.map(fa => {
+        const cc = categoryColorClass(fa);
+        const name = t.categories[fa] || fa;
+        return `<span class="badge badge--${cc}">${name}</span>`;
+      }).join('')
+    : `<span class="badge badge--${focusColorClass}">${catName}</span>`;
+
+  const equipmentCount = lesson.equipment && lesson.equipment.length > 0
+    ? `<span class="meta-item">${iconDumbbell()}<span>${lesson.equipment.length} ציוד</span></span>`
+    : '';
+
   return `
     <a href="#/lesson/${lesson.id}" class="card card--interactive card--accent-start lesson-card"
        style="border-inline-start-color: ${categoryColor(lesson.focusArea)}">
       <div class="card__body lesson-card">
         <div class="lesson-card__title">${lesson.title}</div>
         <div class="lesson-card__meta">
-          <span class="badge badge--${focusColorClass}">${catName}</span>
+          ${focusBadges}
           <span class="badge badge--primary">${lesson.targetAgeGroup}</span>
         </div>
         <div class="lesson-card__footer">
@@ -65,6 +119,7 @@ export function lessonCard(lesson) {
               ${iconExercise()}
               <span>${exerciseCount} ${t.lessons.exercises}</span>
             </span>
+            ${equipmentCount}
           </div>
         </div>
       </div>
@@ -88,6 +143,35 @@ export function categoryBar(exercises) {
   }).join('');
 
   return `<div class="detail-header__bar">${segments}</div>`;
+}
+
+// Music recommendations display
+export function musicRecommendations(recommendations) {
+  if (!recommendations || recommendations.length === 0) return '';
+
+  const tempoLabels = { slow: 'איטי', medium: 'בינוני', fast: 'מהיר' };
+
+  return `
+    <div class="card music-card" style="margin-top:var(--space-4)">
+      <div class="card__body">
+        <h3 class="music-card__title">
+          ${iconMusic()}
+          <span>${t.detail.musicTitle}</span>
+        </h3>
+        <div class="music-list">
+          ${recommendations.map(song => `
+            <div class="music-item">
+              <div class="music-item__info">
+                <span class="music-item__title">${song.title}</span>
+                <span class="music-item__artist">${song.artist}</span>
+              </div>
+              ${song.tempo ? `<span class="badge badge--primary">${tempoLabels[song.tempo] || song.tempo}</span>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 // Skeleton loader cards
@@ -116,7 +200,29 @@ export function focusIcon(iconName) {
     case 'warmup': return iconSun();
     case 'rehab': return iconRehab();
     case 'coordination': return iconCoordination();
+    case 'balance': return iconBalance();
+    case 'cardio': return iconCardio();
+    case 'posture': return iconPosture();
     default: return iconTarget();
+  }
+}
+
+// Equipment icon mapper
+export function equipmentIcon(iconName) {
+  switch (iconName) {
+    case 'bodyweight': return iconBodyweight();
+    case 'mat': return iconMat();
+    case 'ball': return iconBall();
+    case 'band': return iconBand();
+    case 'roller': return iconRoller();
+    case 'weights': return iconWeights();
+    case 'ring': return iconRing();
+    case 'chair': return iconChair();
+    case 'wall': return iconWall();
+    case 'hoop': return iconHoop();
+    case 'rope': return iconRope();
+    case 'bench': return iconBench();
+    default: return iconDumbbell();
   }
 }
 

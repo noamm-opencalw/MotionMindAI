@@ -1,5 +1,5 @@
 export const t = {
-  appName: 'MotionMind AI',
+  appName: 'פאר טוסיק',
   appTagline: 'תוכניות אימון חכמות',
 
   nav: {
@@ -34,15 +34,15 @@ export const t = {
     steps: [
       {
         title: 'בחר פרמטרים',
-        desc: 'גיל, תחום מיקוד ומשך האימון',
+        desc: 'גיל, מכשירים, תחומי מיקוד, מוזיקה ומשך האימון',
       },
       {
         title: 'הבינה המלאכותית יוצרת',
         desc: 'Gemini AI מתכנן תוכנית מפורטת',
       },
       {
-        title: 'קבל תוכנית מוכנה',
-        desc: 'עם תרגילים, זמנים והנחיות מאמן',
+        title: 'התאם ושפר',
+        desc: 'ערוך תרגילים, שנה סדר והוסף הערות',
       },
     ],
   },
@@ -51,7 +51,14 @@ export const t = {
     title: 'יצירת תוכנית אימון חדשה',
     subtitle: 'מלא את הפרטים והבינה המלאכותית תיצור תוכנית מותאמת',
     ageLabel: 'קבוצת גיל',
-    focusLabel: 'תחום מיקוד',
+    equipmentLabel: 'מכשירים וציוד',
+    equipmentHint: 'ניתן לבחור מספר מכשירים',
+    focusLabel: 'תחומי מיקוד',
+    focusHint: 'ניתן לבחור מספר תחומים',
+    musicLabel: 'מוזיקה לאימון',
+    musicStyleLabel: 'סגנון מוזיקה',
+    musicCustomLabel: 'שירים ספציפיים (אופציונלי)',
+    musicCustomPlaceholder: 'לדוגמה: עידן רייכל - שובי אל ביתי, שלומי שבת...',
     durationLabel: 'משך האימון',
     durationUnit: 'דקות',
     submit: 'צור תוכנית',
@@ -67,6 +74,21 @@ export const t = {
     { value: 'גיל הזהב (60+)', label: 'גיל הזהב (60+)' },
   ],
 
+  equipmentOptions: [
+    { value: 'ללא ציוד', label: 'ללא ציוד', icon: 'bodyweight' },
+    { value: 'מזרן', label: 'מזרן', icon: 'mat' },
+    { value: 'כדור פילאטיס', label: 'כדור פילאטיס', icon: 'ball' },
+    { value: 'גומיית התנגדות', label: 'גומיית התנגדות', icon: 'band' },
+    { value: 'רולר קצף', label: 'רולר קצף', icon: 'roller' },
+    { value: 'משקולות קלות', label: 'משקולות קלות', icon: 'weights' },
+    { value: 'טבעת פילאטיס', label: 'טבעת פילאטיס', icon: 'ring' },
+    { value: 'כיסא', label: 'כיסא', icon: 'chair' },
+    { value: 'קיר', label: 'קיר', icon: 'wall' },
+    { value: 'חישוק', label: 'חישוק', icon: 'hoop' },
+    { value: 'חבל קפיצה', label: 'חבל קפיצה', icon: 'rope' },
+    { value: 'ספסל שוודי', label: 'ספסל שוודי', icon: 'bench' },
+  ],
+
   focusOptions: [
     { value: 'Core Strength', label: 'חיזוק ליבה', icon: 'core' },
     { value: 'Flexibility', label: 'גמישות', icon: 'flexibility' },
@@ -74,6 +96,22 @@ export const t = {
     { value: 'Warm-Up', label: 'חימום כללי', icon: 'warmup' },
     { value: 'Rehabilitation', label: 'שיקום', icon: 'rehab' },
     { value: 'Coordination', label: 'קואורדינציה', icon: 'coordination' },
+    { value: 'Balance', label: 'שיווי משקל', icon: 'balance' },
+    { value: 'Cardio', label: 'סיבולת לב-ריאה', icon: 'cardio' },
+    { value: 'Posture', label: 'יציבה', icon: 'posture' },
+  ],
+
+  musicStyles: [
+    { value: 'none', label: 'ללא מוזיקה' },
+    { value: 'calm-instrumental', label: 'אינסטרומנטלי רגוע' },
+    { value: 'pop-hebrew', label: 'פופ ישראלי' },
+    { value: 'pop-international', label: 'פופ בינלאומי' },
+    { value: 'electronic-chill', label: 'אלקטרוני צ\'יל' },
+    { value: 'world-music', label: 'מוזיקת עולם' },
+    { value: 'classical', label: 'קלאסית' },
+    { value: 'mizrahi', label: 'מזרחית' },
+    { value: 'upbeat-energy', label: 'אנרגטי ומהיר' },
+    { value: 'yoga-ambient', label: 'יוגה ואמביינט' },
   ],
 
   durationOptions: [15, 30, 45, 60],
@@ -111,6 +149,16 @@ export const t = {
     minutes: 'דקות',
     notFound: 'התוכנית לא נמצאה',
     notFoundDesc: 'התוכנית שחיפשת לא קיימת',
+    noteLabel: 'הערה',
+    notePlaceholder: 'הוסף הערה לתרגיל...',
+    regenerateExercise: 'צור מחדש תרגיל זה',
+    regenerating: 'יוצר מחדש...',
+    moveUp: 'הזז למעלה',
+    moveDown: 'הזז למטה',
+    editExercises: 'עריכת תרגילים',
+    doneEditing: 'סיום עריכה',
+    musicTitle: 'מוזיקה מומלצת',
+    equipment: 'ציוד',
   },
 
   settings: {
@@ -142,10 +190,14 @@ export const t = {
     invalidApiKey: 'מפתח API לא תקין. בדוק את המפתח בהגדרות.',
     noApiKey: 'יש להגדיר מפתח Gemini API בהגדרות לפני יצירת תוכנית.',
     loadFailed: 'שגיאה בטעינת הנתונים. נסה שנית.',
-    fillAll: 'יש למלא את כל השדות',
+    fillAll: 'יש לבחור קבוצת גיל ותחום מיקוד אחד לפחות',
+    regenerateFailed: 'שגיאה ביצירת התרגיל מחדש. נסה שנית.',
   },
 
   toast: {
     success: 'התוכנית נוצרה בהצלחה!',
+    exerciseRegenerated: 'התרגיל נוצר מחדש!',
+    lessonUpdated: 'התוכנית עודכנה!',
+    noteSaved: 'ההערה נשמרה!',
   },
 };
