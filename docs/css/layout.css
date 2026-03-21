@@ -136,7 +136,7 @@
 }
 
 .page-enter {
-  animation: page-enter var(--transition-base) ease forwards;
+  animation: page-enter 250ms ease both;
 }
 
 @keyframes page-enter {

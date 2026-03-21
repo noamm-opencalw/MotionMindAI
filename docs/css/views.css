@@ -277,6 +277,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  color: var(--color-text);
+}
+
+a.lesson-card {
+  color: inherit;
+  text-decoration: none;
+}
+
+a.lesson-card:hover {
+  color: inherit;
 }
 
 .lesson-card__title {
@@ -404,8 +414,7 @@
 
 .timeline-item {
   position: relative;
-  animation: timeline-enter var(--transition-slow) ease forwards;
-  opacity: 0;
+  animation: timeline-enter 350ms ease both;
 }
 
 .timeline-item:nth-child(1) { animation-delay: 0ms; }

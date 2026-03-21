@@ -128,8 +128,7 @@
    ======================== */
 
 .stagger-enter > * {
-  opacity: 0;
-  animation: stagger-fade-up var(--transition-slow) ease forwards;
+  animation: stagger-fade-up 350ms ease both;
 }
 
 .stagger-enter > *:nth-child(1) { animation-delay: 0ms; }
