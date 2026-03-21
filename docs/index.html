@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MotionMind AI — API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <style>
+    body { margin: 0; background: #fafafa; }
+    .topbar { display: none !important; }
+    #hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: white;
+      padding: 48px 32px 36px;
+      text-align: center;
+    }
+    #hero h1 { margin: 0 0 8px; font-size: 2rem; font-family: sans-serif; }
+    #hero p  { margin: 0; opacity: .75; font-family: sans-serif; font-size: 1rem; }
+    #badge   { display: inline-block; margin-top: 14px; background: #e94560;
+               color: white; border-radius: 20px; padding: 4px 16px;
+               font-size: .8rem; font-family: sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="hero">
+    <h1>🏃 MotionMind AI</h1>
+    <p>AI-powered Pilates &amp; PE lesson plan generator</p>
+    <span id="badge">Powered by Gemini Flash</span>
+  </div>
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    SwaggerUIBundle({
+      spec: {
+        openapi: "3.0.0",
+        info: {
+          title: "MotionMind AI API",
+          version: "1.0.0",
+          description: "Generate intelligent Pilates and PE lesson plans using AI."
+        },
+        servers: [{ url: "https://your-api-url.com", description: "Production" }],
+        paths: {
+          "/api/lessons/generate": {
+            post: {
+              summary: "Generate a lesson plan",
+              description: "Uses Gemini AI to generate a structured lesson plan with exercises, durations, and coach cues.",
+              tags: ["Lessons"],
+              requestBody: {
+                required: true,
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      required: ["targetAge", "focusArea", "durationMinutes"],
+                      properties: {
+                        targetAge:       { type: "string",  example: "Adults",        description: "Target age group" },
+                        focusArea:       { type: "string",  example: "Core Strength", description: "Movement focus area" },
+                        durationMinutes: { type: "integer", example: 45,              description: "Lesson duration in minutes" }
+                      }
+                    }
+                  }
+                }
+              },
+              responses: {
+                "200": {
+                  description: "Generated lesson plan",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        type: "object",
+                        properties: {
+                          title:          { type: "string" },
+                          targetAgeGroup: { type: "string" },
+                          focusArea:      { type: "string" },
+                          durationMinutes:{ type: "integer" },
+                          exercises: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                name:            { type: "string" },
+                                description:     { type: "string" },
+                                durationSeconds: { type: "integer" },
+                                category:        { type: "string", enum: ["Warm-Up","Core","Strength","Flexibility","Cool-Down"] },
+                                coachCues:       { type: "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": { description: "Invalid input" }
+              }
+            }
+          }
+        }
+      },
+      dom_id: "#swagger-ui",
+      deepLinking: true,
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+      layout: "BaseLayout"
+    });
+  </script>
+</body>
+</html>

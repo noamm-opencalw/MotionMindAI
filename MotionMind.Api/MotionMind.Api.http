@@ -1,0 +1,6 @@
+@MotionMind.Api_HostAddress = http://localhost:5155
+
+GET {{MotionMind.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
