@@ -3,7 +3,7 @@ import {
   heroIllustration, iconTimeSaving, iconCertificate, iconBrain,
   iconArrowRight, iconChevronLeft, iconClock, iconUsers, iconExercise,
   iconInstructor, emptyStateIllustration, iconTarget,
-  iconKey, iconCheck, iconTrash, iconAlert, iconEdit, iconMusic, iconDumbbell,
+  iconKey, iconCheck, iconTrash, iconAlert, iconEdit, iconDumbbell,
 } from './icons.js';
 import {
   exerciseCard, lessonCard, categoryBar, skeletonCards,
@@ -194,30 +194,6 @@ export function renderGenerate() {
             </div>
           </div>
 
-          <!-- Music -->
-          <div class="card generate-card">
-            <div class="card__body">
-              <div class="form-group">
-                <label class="form-label">
-                  ${iconMusic()}
-                  ${t.generate.musicLabel}
-                </label>
-                <div class="form-group" style="margin-top:var(--space-2)">
-                  <label class="form-label-sm">${t.generate.musicStyleLabel}</label>
-                  <div class="pill-group pill-group--wrap" data-field="musicStyle">
-                    ${t.musicStyles.map(opt => `
-                      <button type="button" class="pill ${opt.value === 'none' ? 'active' : ''}" data-value="${opt.value}">${opt.label}</button>
-                    `).join('')}
-                  </div>
-                </div>
-                <div class="form-group" style="margin-top:var(--space-3)">
-                  <label class="form-label-sm">${t.generate.musicCustomLabel}</label>
-                  <input type="text" id="music-custom-input" class="settings-input" style="font-family:var(--font-family);direction:rtl;text-align:right" placeholder="${t.generate.musicCustomPlaceholder}" />
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Submit -->
           <button type="submit" class="btn btn--primary btn--lg btn--full btn--shimmer" id="generate-btn">
             ${iconArrowRight()}
@@ -238,7 +214,6 @@ export function initGenerate() {
     equipment: [],
     focus: [],
     duration: 45,
-    musicStyle: 'none',
   };
 
   // Pill selectors (single-select for age and duration)
@@ -254,16 +229,6 @@ export function initGenerate() {
         state.duration = Number(pill.dataset.value);
         document.getElementById('duration-value').textContent = state.duration;
       }
-    });
-  });
-
-  // Music style selector (single-select)
-  form.querySelectorAll('.pill-group[data-field="musicStyle"] .pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      const group = pill.closest('[data-field]');
-      group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      state.musicStyle = pill.dataset.value;
     });
   });
 
@@ -313,14 +278,11 @@ export function initGenerate() {
     showLoading();
 
     try {
-      const musicCustom = document.getElementById('music-custom-input')?.value.trim() || '';
       const lesson = await generateLesson({
         targetAge: state.age,
         focusAreas: state.focus,
         durationMinutes: state.duration,
         equipment: state.equipment,
-        musicStyle: state.musicStyle,
-        musicCustom,
       });
       hideLoading();
       showToast(t.toast.success, 'success');

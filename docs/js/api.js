@@ -48,7 +48,7 @@ function getNextId() {
 // =============================
 // GEMINI DIRECT API CALL
 // =============================
-function buildPrompt({ targetAge, focusAreas, durationMinutes, equipment, musicStyle, musicCustom }) {
+function buildPrompt({ targetAge, focusAreas, durationMinutes, equipment }) {
   const equipmentLine = equipment && equipment.length > 0
     ? `- Available equipment: ${equipment.join(', ')}`
     : '- Available equipment: none (bodyweight only)';
@@ -56,15 +56,6 @@ function buildPrompt({ targetAge, focusAreas, durationMinutes, equipment, musicS
   const focusLine = Array.isArray(focusAreas)
     ? `- Focus areas: ${focusAreas.join(', ')}`
     : `- Focus area: ${focusAreas}`;
-
-  let musicLine = '';
-  if (musicStyle && musicStyle !== 'none') {
-    musicLine = `- Music style for the workout: ${musicStyle}`;
-    if (musicCustom) {
-      musicLine += `\n- Specific songs/artists requested: ${musicCustom}`;
-    }
-    musicLine += `\n- Include a "musicRecommendations" field in the JSON with 3-5 recommended songs (title and artist) matching the workout pace and style. For Hebrew/Israeli music, include original Hebrew names.`;
-  }
 
   return `You are a certified Pilates and Physical Education instructor.
 Generate a structured lesson plan in valid JSON.
@@ -74,7 +65,6 @@ Parameters:
 ${focusLine}
 - Total duration: ${durationMinutes} minutes
 ${equipmentLine}
-${musicLine}
 
 Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
 {
@@ -88,14 +78,14 @@ Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
       "coachCues": "string (in Hebrew)",
       "equipment": "string (in Hebrew, which equipment is used, or empty string if none)"
     }
-  ]${musicStyle && musicStyle !== 'none' ? `,
+  ],
   "musicRecommendations": [
     {
-      "title": "string",
-      "artist": "string",
+      "title": "string (song name)",
+      "artist": "string (artist name)",
       "tempo": "slow | medium | fast"
     }
-  ]` : ''}
+  ]
 }
 
 Rules:
@@ -106,7 +96,8 @@ Rules:
 - Categories must come from the enum above (keep category values in English)
 - Use ONLY the specified equipment; adapt exercises to available tools
 - Incorporate all focus areas into the workout distribution
-- Each exercise must clearly describe proper form and positioning`;
+- Each exercise must clearly describe proper form and positioning
+- Include 3-5 music recommendations that match the workout tempo and energy. Include a mix of Israeli/Hebrew songs and international songs. Song titles and artist names should be in their original language (Hebrew for Israeli songs).`;
 }
 
 function buildRegeneratePrompt(exercise, note, lessonContext) {
@@ -214,7 +205,7 @@ export async function testConnection() {
 // =============================
 // PUBLIC API
 // =============================
-export async function generateLesson({ targetAge, focusAreas, durationMinutes, equipment, musicStyle, musicCustom }) {
+export async function generateLesson({ targetAge, focusAreas, durationMinutes, equipment }) {
   // If a backend API is configured, use it
   if (API_BASE) {
     const res = await fetch(`${API_BASE}/api/lessons/generate`, {
@@ -227,7 +218,7 @@ export async function generateLesson({ targetAge, focusAreas, durationMinutes, e
   }
 
   // Call Gemini directly from the browser
-  const prompt = buildPrompt({ targetAge, focusAreas, durationMinutes, equipment, musicStyle, musicCustom });
+  const prompt = buildPrompt({ targetAge, focusAreas, durationMinutes, equipment });
   const plan = await callGemini(prompt);
 
   // Create a full lesson object
@@ -239,8 +230,6 @@ export async function generateLesson({ targetAge, focusAreas, durationMinutes, e
     focusAreas: Array.isArray(focusAreas) ? focusAreas : [focusAreas],
     durationMinutes,
     equipment: equipment || [],
-    musicStyle: musicStyle || 'none',
-    musicCustom: musicCustom || '',
     musicRecommendations: plan.musicRecommendations || [],
     instructor: { id: 1, name: 'מאמן AI', specialty: 'פילאטיס וחינוך גופני' },
     exercises: (plan.exercises || []).map((ex, i) => ({
