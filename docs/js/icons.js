@@ -258,30 +258,9 @@ export function emptyStateIllustration() {
   </svg>`;
 }
 
-// Logo icon - fitness trainer figure
+// Logo icon - PNG image
 export function logoIcon() {
-  return `<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#2563EB"/>
-        <stop offset="100%" stop-color="#7C3AED"/>
-      </linearGradient>
-    </defs>
-    <rect width="32" height="32" rx="8" fill="url(#logo-grad)"/>
-    <!-- Fitness trainer: head -->
-    <circle cx="16" cy="8" r="3" fill="white"/>
-    <!-- Body -->
-    <line x1="16" y1="11" x2="16" y2="20" stroke="white" stroke-width="2" stroke-linecap="round"/>
-    <!-- Arms raised with weights -->
-    <line x1="16" y1="14" x2="10" y2="10" stroke="white" stroke-width="2" stroke-linecap="round"/>
-    <line x1="16" y1="14" x2="22" y2="10" stroke="white" stroke-width="2" stroke-linecap="round"/>
-    <!-- Dumbbells -->
-    <rect x="7" y="8.5" width="4" height="3" rx="1" fill="white" opacity="0.9"/>
-    <rect x="21" y="8.5" width="4" height="3" rx="1" fill="white" opacity="0.9"/>
-    <!-- Legs -->
-    <line x1="16" y1="20" x2="12" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/>
-    <line x1="16" y1="20" x2="20" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  </svg>`;
+  return `<img src="motionmindai.png" alt="פאר טוסיק" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">`;
 }
 
 export function iconSettings() {
