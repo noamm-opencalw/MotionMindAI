@@ -83,8 +83,8 @@ export function exerciseCard(exercise, index, total, editMode = false) {
 
 // Lesson card for the list view
 export function lessonCard(lesson) {
-  const focusColorClass = categoryColorClass(lesson.focusArea);
-  const catName = t.categories[lesson.focusArea] || lesson.focusArea;
+  const focusColorClass = categoryColorClass(lesson.focusArea || '');
+  const catName = t.categories[lesson.focusArea] || lesson.focusArea || '';
   const exerciseCount = lesson.exercises ? lesson.exercises.length : 0;
 
   // Show multiple focus badges if available
@@ -94,7 +94,7 @@ export function lessonCard(lesson) {
         const name = t.categories[fa] || fa;
         return `<span class="badge badge--${cc}">${name}</span>`;
       }).join('')
-    : `<span class="badge badge--${focusColorClass}">${catName}</span>`;
+    : catName ? `<span class="badge badge--${focusColorClass}">${catName}</span>` : '';
 
   const equipmentCount = lesson.equipment && lesson.equipment.length > 0
     ? `<span class="meta-item">${iconDumbbell()}<span>${lesson.equipment.length} ציוד</span></span>`
@@ -102,12 +102,12 @@ export function lessonCard(lesson) {
 
   return `
     <a href="#/lesson/${lesson.id}" class="card card--interactive card--accent-start lesson-card"
-       style="border-inline-start-color: ${categoryColor(lesson.focusArea)}">
+       style="border-inline-start-color: ${categoryColor(lesson.focusArea || '')}">
       <div class="card__body lesson-card">
-        <div class="lesson-card__title">${lesson.title}</div>
+        <div class="lesson-card__title">${lesson.title || ''}</div>
         <div class="lesson-card__meta">
           ${focusBadges}
-          <span class="badge badge--primary">${lesson.targetAgeGroup}</span>
+          ${lesson.targetAgeGroup ? `<span class="badge badge--primary">${lesson.targetAgeGroup}</span>` : ''}
         </div>
         <div class="lesson-card__footer">
           <div class="lesson-card__stats">

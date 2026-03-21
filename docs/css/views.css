@@ -660,6 +660,158 @@ a.lesson-card:hover {
 }
 
 /* ========================
+   DETAIL EDIT TOGGLE
+   ======================== */
+
+.detail-edit-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+/* ========================
+   EXERCISE CARD ACTIONS (EDIT MODE)
+   ======================== */
+
+.exercise-card__actions {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.exercise-card__reorder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.exercise-card__index {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+  width: 24px;
+  text-align: center;
+}
+
+.exercise-card__edit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.exercise-card__note-input {
+  width: 100%;
+}
+
+.exercise-note-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-family: var(--font-family);
+  background: var(--color-bg);
+  color: var(--color-text);
+  resize: vertical;
+  min-height: 44px;
+  transition: border-color var(--transition-fast);
+  direction: rtl;
+}
+
+.exercise-note-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.exercise-note-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* Exercise note display (view mode) */
+.exercise-card__note {
+  background: var(--color-warmup-light);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 3px solid var(--color-warmup);
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin-top: var(--space-2);
+}
+
+.exercise-card__note svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-warmup);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.exercise-card__note span {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ========================
+   MUSIC CARD
+   ======================== */
+
+.music-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+}
+
+.music-card__title svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-secondary);
+}
+
+.music-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.music-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.music-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0);
+}
+
+.music-item__title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.music-item__artist {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ========================
    RESPONSIVE OVERRIDES
    ======================== */
 

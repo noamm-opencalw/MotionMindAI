@@ -435,12 +435,14 @@ export async function initLessonDetail(id) {
     const totalDuration = exercises.reduce((sum, e) => sum + e.durationSeconds, 0);
     const totalMin = Math.round(totalDuration / 60);
 
-    // Focus areas display
-    const focusAreas = lesson.focusAreas || [lesson.focusArea];
-    const focusBadges = focusAreas.map(fa => {
-      const name = t.categories[fa] || fa;
-      return `<span>${name}</span>`;
-    }).join(' · ');
+    // Focus areas display (backward compatible with old single-focus lessons)
+    const focusAreas = lesson.focusAreas || (lesson.focusArea ? [lesson.focusArea] : []);
+    const focusBadges = focusAreas.length > 0
+      ? focusAreas.map(fa => {
+          const name = t.categories[fa] || fa;
+          return `<span>${name}</span>`;
+        }).join(' · ')
+      : '';
 
     // Equipment display
     const equipmentDisplay = lesson.equipment && lesson.equipment.length > 0
@@ -456,18 +458,24 @@ export async function initLessonDetail(id) {
         <div class="card__body detail-header">
           <h1 class="detail-header__title">${lesson.title}</h1>
           <div class="meta-row">
-            <span class="meta-item">
-              ${iconUsers()}
-              <span>${lesson.targetAgeGroup}</span>
-            </span>
-            <span class="meta-item">
-              ${iconTarget()}
-              <span>${focusBadges}</span>
-            </span>
-            <span class="meta-item">
-              ${iconClock()}
-              <span>${lesson.durationMinutes} ${t.detail.minutes}</span>
-            </span>
+            ${lesson.targetAgeGroup ? `
+              <span class="meta-item">
+                ${iconUsers()}
+                <span>${lesson.targetAgeGroup}</span>
+              </span>
+            ` : ''}
+            ${focusBadges ? `
+              <span class="meta-item">
+                ${iconTarget()}
+                <span>${focusBadges}</span>
+              </span>
+            ` : ''}
+            ${lesson.durationMinutes ? `
+              <span class="meta-item">
+                ${iconClock()}
+                <span>${lesson.durationMinutes} ${t.detail.minutes}</span>
+              </span>
+            ` : ''}
             ${equipmentDisplay}
             ${lesson.instructor ? `
               <span class="meta-item">
