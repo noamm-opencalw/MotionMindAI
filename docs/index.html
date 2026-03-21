@@ -1,168 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MotionMind AI — API Docs</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
-  <style>
-    body { margin: 0; background: #fafafa; }
-    .topbar { display: none !important; }
-    #hero {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-      color: white;
-      padding: 48px 32px 36px;
-      text-align: center;
-    }
-    #hero h1 { margin: 0 0 8px; font-size: 2rem; font-family: sans-serif; }
-    #hero p  { margin: 0; opacity: .75; font-family: sans-serif; font-size: 1rem; }
-    #badge   { display: inline-block; margin-top: 14px; background: #e94560;
-               color: white; border-radius: 20px; padding: 4px 16px;
-               font-size: .8rem; font-family: sans-serif; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1E3A8A">
+  <meta name="description" content="MotionMind AI — מערכת חכמה ליצירת תוכניות אימון פילאטיס וחינוך גופני באמצעות בינה מלאכותית">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>MotionMind AI — תוכניות אימון חכמות</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563EB'/><text x='7' y='23' font-size='18' fill='white' font-family='sans-serif' font-weight='bold'>M</text></svg>">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="stylesheet" href="css/animations.css">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="MotionMind AI — תוכניות אימון חכמות">
+  <meta property="og:description" content="יצירת תוכניות אימון מקצועיות באמצעות בינה מלאכותית. פילאטיס, חינוך גופני, שיקום ועוד.">
+  <meta property="og:type" content="website">
 </head>
 <body>
-  <div id="hero">
-    <h1>🏃 MotionMind AI</h1>
-    <p>AI-powered Pilates &amp; PE lesson plan generator</p>
-    <span id="badge">Powered by Gemini Flash</span>
-  </div>
-  <div id="swagger-ui"></div>
 
-  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
-  <script>
-    SwaggerUIBundle({
-      spec: {
-        openapi: "3.0.0",
-        info: {
-          title: "MotionMind AI API",
-          version: "1.0.0",
-          description: "Generate intelligent Pilates and PE lesson plans using AI."
-        },
-        servers: [{ url: "https://your-api-url.com", description: "Production" }],
-        paths: {
-          "/api/lessons/generate": {
-            post: {
-              summary: "Generate a lesson plan",
-              description: "Uses Gemini AI to generate a structured lesson plan with exercises, durations, and coach cues.",
-              tags: ["Lessons"],
-              requestBody: {
-                required: true,
-                content: {
-                  "application/json": {
-                    schema: {
-                      type: "object",
-                      required: ["targetAge", "focusArea", "durationMinutes"],
-                      properties: {
-                        targetAge:       { type: "string",  example: "Adults",        description: "Target age group" },
-                        focusArea:       { type: "string",  example: "Core Strength", description: "Movement focus area" },
-                        durationMinutes: { type: "integer", example: 45,              description: "Lesson duration in minutes" }
-                      }
-                    }
-                  }
-                }
-              },
-              responses: {
-                "200": {
-                  description: "Generated lesson plan",
-                  content: {
-                    "application/json": {
-                      schema: { $ref: "#/components/schemas/LessonPlan" }
-                    }
-                  }
-                },
-                "400": { description: "Invalid input" }
-              }
-            }
-          },
-          "/api/lessons": {
-            get: {
-              summary: "Get all lesson plans",
-              description: "Retrieve all saved lesson plans with their exercises and instructor details.",
-              tags: ["Lessons"],
-              responses: {
-                "200": {
-                  description: "List of lesson plans",
-                  content: {
-                    "application/json": {
-                      schema: {
-                        type: "array",
-                        items: { $ref: "#/components/schemas/LessonPlan" }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "/api/lessons/{id}": {
-            get: {
-              summary: "Get a lesson plan by ID",
-              description: "Retrieve a specific lesson plan by its ID.",
-              tags: ["Lessons"],
-              parameters: [{
-                name: "id",
-                in: "path",
-                required: true,
-                schema: { type: "integer" },
-                description: "Lesson plan ID"
-              }],
-              responses: {
-                "200": {
-                  description: "The lesson plan",
-                  content: {
-                    "application/json": {
-                      schema: { $ref: "#/components/schemas/LessonPlan" }
-                    }
-                  }
-                },
-                "404": { description: "Lesson plan not found" }
-              }
-            }
-          }
-        },
-        components: {
-          schemas: {
-            LessonPlan: {
-              type: "object",
-              properties: {
-                id:              { type: "integer" },
-                title:           { type: "string", example: "Core Power Pilates" },
-                targetAgeGroup:  { type: "string", example: "Adults" },
-                focusArea:       { type: "string", example: "Core Strength" },
-                durationMinutes: { type: "integer", example: 45 },
-                instructor: {
-                  type: "object",
-                  properties: {
-                    id:        { type: "integer" },
-                    name:      { type: "string", example: "AI Fitness Coach" },
-                    specialty: { type: "string", example: "AI-Generated Workouts" }
-                  }
-                },
-                exercises: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      id:              { type: "integer" },
-                      name:            { type: "string", example: "Pilates Hundred" },
-                      description:     { type: "string", example: "Classic Pilates exercise targeting core endurance" },
-                      durationSeconds: { type: "integer", example: 120 },
-                      category:        { type: "string", enum: ["Warm-Up","Core","Strength","Flexibility","Cool-Down"] },
-                      coachCues:       { type: "string", example: "Keep your lower back pressed into the mat" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      dom_id: "#swagger-ui",
-      deepLinking: true,
-      presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
-      layout: "BaseLayout"
-    });
-  </script>
+  <!-- Header -->
+  <header class="header">
+    <div class="header__inner"></div>
+  </header>
+
+  <!-- Main App Container -->
+  <main id="app"></main>
+
+  <!-- Bottom Navigation -->
+  <nav id="bottom-nav" class="bottom-nav"></nav>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- App Script -->
+  <script type="module" src="js/app.js"></script>
+
 </body>
 </html>
