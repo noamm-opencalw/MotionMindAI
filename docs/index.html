@@ -67,32 +67,92 @@
                   description: "Generated lesson plan",
                   content: {
                     "application/json": {
-                      schema: {
-                        type: "object",
-                        properties: {
-                          title:          { type: "string" },
-                          targetAgeGroup: { type: "string" },
-                          focusArea:      { type: "string" },
-                          durationMinutes:{ type: "integer" },
-                          exercises: {
-                            type: "array",
-                            items: {
-                              type: "object",
-                              properties: {
-                                name:            { type: "string" },
-                                description:     { type: "string" },
-                                durationSeconds: { type: "integer" },
-                                category:        { type: "string", enum: ["Warm-Up","Core","Strength","Flexibility","Cool-Down"] },
-                                coachCues:       { type: "string" }
-                              }
-                            }
-                          }
-                        }
-                      }
+                      schema: { $ref: "#/components/schemas/LessonPlan" }
                     }
                   }
                 },
                 "400": { description: "Invalid input" }
+              }
+            }
+          },
+          "/api/lessons": {
+            get: {
+              summary: "Get all lesson plans",
+              description: "Retrieve all saved lesson plans with their exercises and instructor details.",
+              tags: ["Lessons"],
+              responses: {
+                "200": {
+                  description: "List of lesson plans",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/LessonPlan" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/api/lessons/{id}": {
+            get: {
+              summary: "Get a lesson plan by ID",
+              description: "Retrieve a specific lesson plan by its ID.",
+              tags: ["Lessons"],
+              parameters: [{
+                name: "id",
+                in: "path",
+                required: true,
+                schema: { type: "integer" },
+                description: "Lesson plan ID"
+              }],
+              responses: {
+                "200": {
+                  description: "The lesson plan",
+                  content: {
+                    "application/json": {
+                      schema: { $ref: "#/components/schemas/LessonPlan" }
+                    }
+                  }
+                },
+                "404": { description: "Lesson plan not found" }
+              }
+            }
+          }
+        },
+        components: {
+          schemas: {
+            LessonPlan: {
+              type: "object",
+              properties: {
+                id:              { type: "integer" },
+                title:           { type: "string", example: "Core Power Pilates" },
+                targetAgeGroup:  { type: "string", example: "Adults" },
+                focusArea:       { type: "string", example: "Core Strength" },
+                durationMinutes: { type: "integer", example: 45 },
+                instructor: {
+                  type: "object",
+                  properties: {
+                    id:        { type: "integer" },
+                    name:      { type: "string", example: "AI Fitness Coach" },
+                    specialty: { type: "string", example: "AI-Generated Workouts" }
+                  }
+                },
+                exercises: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id:              { type: "integer" },
+                      name:            { type: "string", example: "Pilates Hundred" },
+                      description:     { type: "string", example: "Classic Pilates exercise targeting core endurance" },
+                      durationSeconds: { type: "integer", example: 120 },
+                      category:        { type: "string", enum: ["Warm-Up","Core","Strength","Flexibility","Cool-Down"] },
+                      coachCues:       { type: "string", example: "Keep your lower back pressed into the mat" }
+                    }
+                  }
+                }
               }
             }
           }

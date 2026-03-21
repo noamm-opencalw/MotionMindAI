@@ -15,14 +15,14 @@ An AI-powered lesson planning system built with .NET that generates intelligent 
 
 ### Prerequisites
 
-- .NET 8.0 or later
+- .NET 10.0 or later
 - Docker (optional, for containerized deployment)
 
 ### Local Development
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/MotionMindAI.git
+   git clone https://github.com/noamm-opencalw/MotionMindAI.git
    cd MotionMindAI
    ```
 
@@ -35,18 +35,18 @@ An AI-powered lesson planning system built with .NET that generates intelligent 
 
    Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey), then:
 
-   - Option A: Update `MotionMind.Api/appsettings.json`:
+   - Option A: Set environment variable (recommended):
+     ```bash
+     export GEMINI__APIKEY=YOUR_API_KEY_HERE
+     ```
+
+   - Option B: Update `MotionMind.Api/appsettings.json`:
      ```json
      {
        "Gemini": {
          "ApiKey": "YOUR_API_KEY_HERE"
        }
      }
-     ```
-
-   - Option B: Set environment variable:
-     ```bash
-     export GEMINI__APIKEY=YOUR_API_KEY_HERE
      ```
 
 4. **Run the application**
@@ -87,7 +87,7 @@ Since this is a .NET API (not static HTML), you cannot deploy the full applicati
 2. Navigate to "Pages" in the sidebar
 3. Set source to "Deploy from a branch"
 4. Select "main" branch and "/docs" folder
-5. Access your docs at: `https://YOUR_USERNAME.github.io/MotionMindAI/`
+5. Access your docs at: `https://noamm-opencalw.github.io/MotionMindAI/`
 
 ### Option 2: Railway (Recommended for .NET APIs)
 
