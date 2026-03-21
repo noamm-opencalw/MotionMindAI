@@ -1,10 +1,11 @@
 import { t } from './i18n.js';
-import { logoIcon, iconHome, iconSparkle, iconList } from './icons.js';
+import { logoIcon, iconHome, iconSparkle, iconList, iconSettings } from './icons.js';
 import {
   renderHome,
   renderGenerate, initGenerate,
   renderLessons, initLessons,
   renderLessonDetail, initLessonDetail,
+  renderSettings, initSettings,
 } from './views.js';
 
 // =============================
@@ -15,6 +16,7 @@ const routes = [
   { pattern: /^#\/generate$/, view: 'generate' },
   { pattern: /^#\/lessons$/, view: 'lessons' },
   { pattern: /^#\/lesson\/(\d+)$/, view: 'detail' },
+  { pattern: /^#\/settings$/, view: 'settings' },
 ];
 
 function matchRoute(hash) {
@@ -46,6 +48,10 @@ async function navigate() {
     case 'detail':
       app.innerHTML = renderLessonDetail();
       initLessonDetail(params[0]);
+      break;
+    case 'settings':
+      app.innerHTML = renderSettings();
+      initSettings();
       break;
   }
 
@@ -84,6 +90,7 @@ function createAppShell() {
         <a href="#/" class="header__nav-item" data-view="home">${t.nav.home}</a>
         <a href="#/generate" class="header__nav-item" data-view="generate">${t.nav.generate}</a>
         <a href="#/lessons" class="header__nav-item" data-view="lessons">${t.nav.lessons}</a>
+        <a href="#/settings" class="header__nav-item" data-view="settings">${t.settings.title}</a>
       </nav>
       <div class="header__status">
         <span class="header__status-dot"></span>
@@ -115,6 +122,10 @@ function createAppShell() {
       <a href="#/lessons" class="bottom-nav__item" data-view="lessons">
         ${iconList()}
         <span>${t.nav.lessons}</span>
+      </a>
+      <a href="#/settings" class="bottom-nav__item" data-view="settings">
+        ${iconSettings()}
+        <span>${t.settings.title}</span>
       </a>
     `;
   }

@@ -113,8 +113,30 @@ export const t = {
     notFoundDesc: 'התוכנית שחיפשת לא קיימת',
   },
 
+  settings: {
+    title: 'הגדרות',
+    apiKeyLabel: 'מפתח Gemini API',
+    apiKeyPlaceholder: 'הכנס את מפתח ה-API שלך...',
+    apiKeyHelp: 'קבל מפתח חינמי מ-',
+    apiKeyLink: 'Google AI Studio',
+    save: 'שמור',
+    clear: 'נקה מפתח',
+    saved: 'המפתח נשמר בהצלחה',
+    cleared: 'המפתח נמחק',
+    status: {
+      connected: 'מחובר ומוכן ליצירה',
+      notConnected: 'לא מוגדר — יש להזין מפתח API',
+    },
+    dataTitle: 'ניהול נתונים',
+    clearData: 'מחק את כל התוכניות',
+    dataCleared: 'כל התוכניות נמחקו',
+    clearConfirm: 'האם למחוק את כל התוכניות השמורות?',
+  },
+
   errors: {
     generateFailed: 'שגיאה ביצירת התוכנית. נסה שנית.',
+    invalidApiKey: 'מפתח API לא תקין. בדוק את המפתח בהגדרות.',
+    noApiKey: 'יש להגדיר מפתח Gemini API בהגדרות לפני יצירת תוכנית.',
     loadFailed: 'שגיאה בטעינת הנתונים. נסה שנית.',
     fillAll: 'יש למלא את כל השדות',
   },

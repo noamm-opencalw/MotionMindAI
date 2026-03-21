@@ -1,135 +1,194 @@
-// API configuration — change this to your deployed API URL
-const API_BASE = '';
+// =============================
+// CONFIGURATION
+// =============================
+const API_BASE = ''; // Set to deployed API URL if available
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-// Mock data for demo mode (when API is not available)
-const MOCK_LESSONS = [
-  {
-    id: 1,
-    title: 'פילאטיס ליבה - עוצמה ושליטה',
-    targetAgeGroup: 'מבוגרים',
-    focusArea: 'Core Strength',
-    durationMinutes: 45,
-    instructor: { id: 1, name: 'מאמן AI', specialty: 'אימונים מבוססי בינה מלאכותית' },
-    exercises: [
-      { id: 1, name: 'חימום - Cat-Cow', description: 'תנועה עדינה של עמוד השדרה לחימום הגב והליבה. תנועה איטית ומבוקרת בין קשת לעיגול.', durationSeconds: 180, category: 'Warm-Up', coachCues: 'נשמו עמוק, הרגישו כל חוליה בעמוד השדרה זזה בנפרד. שמרו על כתפיים רחוקות מהאוזניים.' },
-      { id: 2, name: 'Pilates Hundred', description: 'תרגיל קלאסי לסיבולת הליבה. שכיבה על הגב עם רגליים ב-tabletop, הנפת ראש וכתפיים.', durationSeconds: 120, category: 'Core', coachCues: 'שמרו על גב תחתון צמוד לרצפה. ידיים פועמות בתנועות קטנות ומבוקרות לצד הגוף.' },
-      { id: 3, name: 'Single Leg Stretch', description: 'חיזוק שרירי הבטן וייצוב אגן. משיכת ברך לחזה בחילופין.', durationSeconds: 150, category: 'Core', coachCues: 'שמרו על הגב התחתון צמוד למזרן. החליפו רגליים בתנועה זורמת ורציפה.' },
-      { id: 4, name: 'גשר אגן', description: 'חיזוק הישבן וגב תחתון. הרמת אגן מכיפוף ברכיים בשכיבה על הגב.', durationSeconds: 120, category: 'Strength', coachCues: 'לחצו כפות רגליים לרצפה. עלו חוליה אחרי חוליה ורדו באותה דרך.' },
-      { id: 5, name: 'Plank', description: 'ייצוב כל שרירי הליבה. עמידה על אמות ידיים וקצות אצבעות הרגליים.', durationSeconds: 60, category: 'Strength', coachCues: 'שמרו על קו ישר מראש ועד עקבים. אל תתנו לאגן לצנוח או להתרומם.' },
-      { id: 6, name: 'מתיחת יונה', description: 'מתיחה עמוקה לכופפי הירך ולשרירי הירך הקדמיים.', durationSeconds: 120, category: 'Flexibility', coachCues: 'שמרו על אגן מאוזן. נשמו לעומק המתיחה, אל תכריחו.' },
-      { id: 7, name: 'תנוחת ילד', description: 'שחרור ומנוחה. ישיבה על העקבים, ידיים מושטות קדימה, מצח על הרצפה.', durationSeconds: 120, category: 'Cool-Down', coachCues: 'תנו לגב להתארך. נשמו לאזור הצלעות האחוריות. הרגישו את השחרור.' },
-    ],
-  },
-  {
-    id: 2,
-    title: 'אימון גמישות - זרימה ותנועה',
-    targetAgeGroup: 'מבוגרים',
-    focusArea: 'Flexibility',
-    durationMinutes: 30,
-    instructor: { id: 1, name: 'מאמן AI', specialty: 'אימונים מבוססי בינה מלאכותית' },
-    exercises: [
-      { id: 8, name: 'נשימות וחימום', description: 'נשימות עמוקות עם תנועות עדינות של צוואר וכתפיים.', durationSeconds: 120, category: 'Warm-Up', coachCues: 'עצמו עיניים, התמקדו בנשימה. שחררו כל מתח.' },
-      { id: 9, name: 'סיבובי עמוד שדרה', description: 'סיבוב עדין של פלג גוף עליון בישיבה או בשכיבה.', durationSeconds: 120, category: 'Flexibility', coachCues: 'סובבו מהמותן, לא מהכתפיים. שמרו על אגן יציב.' },
-      { id: 10, name: 'מתיחת המסטרינג', description: 'מתיחה לשרירי הירך האחוריים בעזרת רצועה.', durationSeconds: 150, category: 'Flexibility', coachCues: 'שמרו על הרגל ישרה, כופפו מהירך. אל תנעלו ברך.' },
-      { id: 11, name: 'שחרור גב', description: 'גלגול איטי של עמוד השדרה ומתיחות עדינות.', durationSeconds: 150, category: 'Cool-Down', coachCues: 'תנו למשיכת הכובד לעשות את העבודה. נשמו ושחררו.' },
-    ],
-  },
-];
-
-let mockIdCounter = MOCK_LESSONS.length;
-
-// Check if we're in demo mode (no API configured)
-function isDemoMode() {
-  return !API_BASE;
+// =============================
+// API KEY MANAGEMENT (localStorage)
+// =============================
+export function getApiKey() {
+  return localStorage.getItem('motionmind_gemini_key') || '';
 }
 
-export async function generateLesson(targetAge, focusArea, durationMinutes) {
-  if (isDemoMode()) {
-    // Simulate API delay
-    await new Promise(r => setTimeout(r, 2000));
-    mockIdCounter++;
-    const mock = {
-      id: mockIdCounter,
-      title: `תוכנית ${focusArea === 'Core Strength' ? 'ליבה' : focusArea === 'Flexibility' ? 'גמישות' : focusArea === 'Strength' ? 'כוח' : 'אימון'} - ${targetAge}`,
-      targetAgeGroup: targetAge,
-      focusArea,
-      durationMinutes,
-      instructor: { id: 1, name: 'מאמן AI', specialty: 'אימונים מבוססי בינה מלאכותית' },
-      exercises: generateMockExercises(focusArea, durationMinutes),
-    };
-    MOCK_LESSONS.push(mock);
-    return mock;
+export function setApiKey(key) {
+  if (key) {
+    localStorage.setItem('motionmind_gemini_key', key.trim());
+  } else {
+    localStorage.removeItem('motionmind_gemini_key');
   }
+}
 
-  const res = await fetch(`${API_BASE}/api/lessons/generate`, {
+export function hasApiKey() {
+  return getApiKey().length > 0;
+}
+
+// =============================
+// LESSON STORAGE (localStorage)
+// =============================
+function getLessonsFromStorage() {
+  try {
+    return JSON.parse(localStorage.getItem('motionmind_lessons') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveLessonsToStorage(lessons) {
+  localStorage.setItem('motionmind_lessons', JSON.stringify(lessons));
+}
+
+function getNextId() {
+  const lessons = getLessonsFromStorage();
+  if (lessons.length === 0) return 1;
+  return Math.max(...lessons.map(l => l.id)) + 1;
+}
+
+// =============================
+// GEMINI DIRECT API CALL
+// =============================
+function buildPrompt(targetAge, focusArea, durationMinutes) {
+  return `You are a certified Pilates and Physical Education instructor.
+Generate a structured lesson plan in valid JSON.
+
+Parameters:
+- Target age group: ${targetAge}
+- Focus area: ${focusArea}
+- Total duration: ${durationMinutes} minutes
+
+Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
+{
+  "title": "string (in Hebrew)",
+  "exercises": [
+    {
+      "name": "string (in Hebrew)",
+      "description": "string (in Hebrew)",
+      "durationSeconds": number,
+      "category": "Warm-Up | Core | Strength | Flexibility | Cool-Down",
+      "coachCues": "string (in Hebrew)"
+    }
+  ]
+}
+
+Rules:
+- IMPORTANT: All text fields (title, name, description, coachCues) MUST be in Hebrew
+- Include 4-7 exercises appropriate for ${targetAge}
+- Total exercise time should fill approximately ${durationMinutes} minutes
+- coachCues should be concise verbal instructions an instructor would say
+- Categories must come from the enum above (keep category values in English)`;
+}
+
+async function callGemini(targetAge, focusArea, durationMinutes) {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('NO_API_KEY');
+
+  const prompt = buildPrompt(targetAge, focusArea, durationMinutes);
+
+  const requestBody = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.7,
+      responseMimeType: 'application/json',
+    },
+  };
+
+  const url = `${GEMINI_URL}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+  const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ targetAge, focusArea, durationMinutes }),
+    body: JSON.stringify(requestBody),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Gemini API error:', response.status, errorText);
+    if (response.status === 400 || response.status === 403) {
+      throw new Error('INVALID_API_KEY');
+    }
+    throw new Error(`Gemini API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const jsonText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!jsonText) throw new Error('Empty response from Gemini');
+
+  // Parse the JSON response
+  const plan = JSON.parse(jsonText);
+  return plan;
+}
+
+// =============================
+// PUBLIC API
+// =============================
+export async function generateLesson(targetAge, focusArea, durationMinutes) {
+  // If a backend API is configured, use it
+  if (API_BASE) {
+    const res = await fetch(`${API_BASE}/api/lessons/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetAge, focusArea, durationMinutes }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  // Call Gemini directly from the browser
+  const plan = await callGemini(targetAge, focusArea, durationMinutes);
+
+  // Create a full lesson object
+  const lesson = {
+    id: getNextId(),
+    title: plan.title,
+    targetAgeGroup: targetAge,
+    focusArea,
+    durationMinutes,
+    instructor: { id: 1, name: 'מאמן AI', specialty: 'פילאטיס וחינוך גופני' },
+    exercises: (plan.exercises || []).map((ex, i) => ({
+      id: Date.now() + i,
+      name: ex.name,
+      description: ex.description,
+      durationSeconds: ex.durationSeconds,
+      category: ex.category,
+      coachCues: ex.coachCues,
+    })),
+  };
+
+  // Save to localStorage
+  const lessons = getLessonsFromStorage();
+  lessons.push(lesson);
+  saveLessonsToStorage(lessons);
+
+  return lesson;
 }
 
 export async function getAllLessons() {
-  if (isDemoMode()) {
-    await new Promise(r => setTimeout(r, 300));
-    return [...MOCK_LESSONS];
+  if (API_BASE) {
+    const res = await fetch(`${API_BASE}/api/lessons`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
   }
 
-  const res = await fetch(`${API_BASE}/api/lessons`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  return getLessonsFromStorage();
 }
 
 export async function getLessonById(id) {
-  if (isDemoMode()) {
-    await new Promise(r => setTimeout(r, 200));
-    const lesson = MOCK_LESSONS.find(l => l.id === Number(id));
-    return lesson || null;
+  if (API_BASE) {
+    const res = await fetch(`${API_BASE}/api/lessons/${id}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
   }
 
-  const res = await fetch(`${API_BASE}/api/lessons/${id}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  const lessons = getLessonsFromStorage();
+  return lessons.find(l => l.id === Number(id)) || null;
 }
 
-function generateMockExercises(focusArea, durationMinutes) {
-  const totalSeconds = durationMinutes * 60;
-  const exerciseBank = {
-    'Core Strength': [
-      { name: 'חימום ליבה', category: 'Warm-Up', coachCues: 'התחילו בעדינות, חממו את שרירי הבטן.' },
-      { name: 'Pilates Hundred', category: 'Core', coachCues: 'גב תחתון צמוד לרצפה, ידיים פועמות.' },
-      { name: 'Dead Bug', category: 'Core', coachCues: 'שמרו על גב תחתון צמוד, הזיזו יד ורגל נגדיות.' },
-      { name: 'Plank Hold', category: 'Strength', coachCues: 'קו ישר מראש לעקבים, נשמו באופן קבוע.' },
-      { name: 'Bird Dog', category: 'Core', coachCues: 'שמרו על אגן יציב, הושיטו יד ורגל נגדיות.' },
-      { name: 'שחרור ונשימות', category: 'Cool-Down', coachCues: 'נשימות עמוקות, שחררו את כל השרירים.' },
-    ],
-    'Flexibility': [
-      { name: 'נשימות ותנועה', category: 'Warm-Up', coachCues: 'נשימה עמוקה, תנועות עדינות.' },
-      { name: 'Cat-Cow Flow', category: 'Flexibility', coachCues: 'חוליה אחרי חוליה, תנועה זורמת.' },
-      { name: 'מתיחת יונה', category: 'Flexibility', coachCues: 'אגן מאוזן, נשמו לעומק.' },
-      { name: 'Forward Fold', category: 'Flexibility', coachCues: 'כופפו מהירכיים, שמרו על גב ארוך.' },
-      { name: 'שחרור סופי', category: 'Cool-Down', coachCues: 'שכבו בשלווה, שחררו כל מתח.' },
-    ],
-    'Strength': [
-      { name: 'חימום דינמי', category: 'Warm-Up', coachCues: 'הזיזו את כל המפרקים, חממו את הגוף.' },
-      { name: 'סקוואט', category: 'Strength', coachCues: 'ברכיים בכיוון האצבעות, ירדו עמוק.' },
-      { name: 'לאנג\'ים', category: 'Strength', coachCues: 'צעד רחב, ברך אחורית כמעט לרצפה.' },
-      { name: 'שכיבות סמיכה', category: 'Strength', coachCues: 'גוף ישר כקרש, ירדו לאט.' },
-      { name: 'גשר ישבני', category: 'Strength', coachCues: 'לחצו כפות רגליים, הרימו אגן.' },
-      { name: 'מתיחות סיום', category: 'Cool-Down', coachCues: 'מתחו כל שריר שעבד, נשמו עמוק.' },
-    ],
-  };
+export async function deleteLesson(id) {
+  if (API_BASE) return; // Not implemented in backend
 
-  const exercises = exerciseBank[focusArea] || exerciseBank['Core Strength'];
-  const perExercise = Math.round(totalSeconds / exercises.length);
-
-  return exercises.map((ex, i) => ({
-    id: Date.now() + i,
-    name: ex.name,
-    description: `תרגיל ${i + 1} מתוך ${exercises.length} בתוכנית`,
-    durationSeconds: perExercise,
-    category: ex.category,
-    coachCues: ex.coachCues,
-  }));
+  const lessons = getLessonsFromStorage();
+  const filtered = lessons.filter(l => l.id !== Number(id));
+  saveLessonsToStorage(filtered);
 }

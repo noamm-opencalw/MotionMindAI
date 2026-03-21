@@ -3,19 +3,35 @@ import {
   heroIllustration, iconTimeSaving, iconCertificate, iconBrain,
   iconArrowRight, iconChevronLeft, iconClock, iconUsers, iconExercise,
   iconInstructor, emptyStateIllustration, iconTarget,
+  iconKey, iconCheck, iconTrash, iconAlert,
 } from './icons.js';
 import {
   exerciseCard, lessonCard, categoryBar, skeletonCards,
   focusIcon, showToast, showLoading, hideLoading,
 } from './components.js';
-import { generateLesson, getAllLessons, getLessonById } from './api.js';
+import { generateLesson, getAllLessons, getLessonById, hasApiKey, getApiKey, setApiKey } from './api.js';
 
 // =============================
 // HOME VIEW
 // =============================
 export function renderHome() {
+  const hasKey = hasApiKey();
+
   return `
     <div class="page page-enter">
+      <!-- API Key Banner -->
+      ${!hasKey ? `
+        <div class="container" style="margin-bottom:0">
+          <a href="#/settings" class="api-banner">
+            <div class="api-banner__icon">${iconAlert()}</div>
+            <div class="api-banner__text">
+              <strong>${t.errors.noApiKey}</strong>
+            </div>
+            <div class="api-banner__arrow">${iconArrowRight()}</div>
+          </a>
+        </div>
+      ` : ''}
+
       <!-- Hero -->
       <section class="hero">
         <div class="hero__particles">
@@ -82,11 +98,23 @@ export function renderHome() {
 // GENERATE VIEW
 // =============================
 export function renderGenerate() {
+  const hasKey = hasApiKey();
+
   return `
     <div class="page page-enter">
       <div class="container container--narrow">
         <h1 class="section-title">${t.generate.title}</h1>
         <p class="section-subtitle" style="margin-bottom:var(--space-6)">${t.generate.subtitle}</p>
+
+        ${!hasKey ? `
+          <a href="#/settings" class="api-banner" style="margin-bottom:var(--space-4)">
+            <div class="api-banner__icon">${iconAlert()}</div>
+            <div class="api-banner__text">
+              <strong>${t.errors.noApiKey}</strong>
+            </div>
+            <div class="api-banner__arrow">${iconArrowRight()}</div>
+          </a>
+        ` : ''}
 
         <form id="generate-form" class="generate-form">
           <!-- Age Group -->
@@ -191,6 +219,12 @@ export function initGenerate() {
       return;
     }
 
+    if (!hasApiKey()) {
+      showToast(t.errors.noApiKey, 'error');
+      setTimeout(() => { window.location.hash = '#/settings'; }, 1500);
+      return;
+    }
+
     showLoading();
 
     try {
@@ -200,7 +234,14 @@ export function initGenerate() {
       window.location.hash = `#/lesson/${lesson.id}`;
     } catch (err) {
       hideLoading();
-      showToast(t.errors.generateFailed, 'error');
+      if (err.message === 'NO_API_KEY') {
+        showToast(t.errors.noApiKey, 'error');
+        setTimeout(() => { window.location.hash = '#/settings'; }, 1500);
+      } else if (err.message === 'INVALID_API_KEY') {
+        showToast(t.errors.invalidApiKey, 'error');
+      } else {
+        showToast(t.errors.generateFailed, 'error');
+      }
       console.error('Generate error:', err);
     }
   });
@@ -357,5 +398,129 @@ export async function initLessonDetail(id) {
       </div>
     `;
     console.error('Load detail error:', err);
+  }
+}
+
+// =============================
+// SETTINGS VIEW
+// =============================
+export function renderSettings() {
+  const currentKey = getApiKey();
+  const masked = currentKey ? currentKey.slice(0, 8) + '••••••••' + currentKey.slice(-4) : '';
+  const isConnected = hasApiKey();
+
+  return `
+    <div class="page page-enter">
+      <div class="container container--narrow">
+        <h1 class="section-title">${t.settings.title}</h1>
+
+        <!-- Connection Status -->
+        <div class="card" style="margin-bottom:var(--space-4)">
+          <div class="card__body">
+            <div class="settings-status ${isConnected ? 'settings-status--connected' : 'settings-status--disconnected'}">
+              <div class="settings-status__dot"></div>
+              <span>${isConnected ? t.settings.status.connected : t.settings.status.notConnected}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Key -->
+        <div class="card" style="margin-bottom:var(--space-4)">
+          <div class="card__body">
+            <div class="form-group" style="margin-bottom:var(--space-4)">
+              <label class="form-label">
+                ${iconKey()}
+                ${t.settings.apiKeyLabel}
+              </label>
+              <div style="position:relative">
+                <input
+                  type="password"
+                  id="api-key-input"
+                  class="settings-input"
+                  placeholder="${t.settings.apiKeyPlaceholder}"
+                  value="${currentKey}"
+                  autocomplete="off"
+                  dir="ltr"
+                />
+              </div>
+              <p class="settings-help">
+                ${t.settings.apiKeyHelp}
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">${t.settings.apiKeyLink}</a>
+              </p>
+            </div>
+
+            <div style="display:flex;gap:var(--space-2)">
+              <button type="button" id="save-key-btn" class="btn btn--primary" style="flex:1">
+                ${iconCheck()}
+                ${t.settings.save}
+              </button>
+              ${currentKey ? `
+                <button type="button" id="clear-key-btn" class="btn btn--ghost">
+                  ${iconTrash()}
+                  ${t.settings.clear}
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="card">
+          <div class="card__body">
+            <div class="form-group">
+              <label class="form-label">${t.settings.dataTitle}</label>
+              <button type="button" id="clear-data-btn" class="btn btn--ghost" style="color:var(--color-error)">
+                ${iconTrash()}
+                ${t.settings.clearData}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+export function initSettings() {
+  const saveBtn = document.getElementById('save-key-btn');
+  const clearBtn = document.getElementById('clear-key-btn');
+  const clearDataBtn = document.getElementById('clear-data-btn');
+  const input = document.getElementById('api-key-input');
+
+  if (saveBtn && input) {
+    saveBtn.addEventListener('click', () => {
+      const key = input.value.trim();
+      if (key) {
+        setApiKey(key);
+        showToast(t.settings.saved, 'success');
+        // Re-render to update status
+        setTimeout(() => { window.location.hash = '#/settings'; location.reload(); }, 800);
+      }
+    });
+
+    // Also save on Enter
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveBtn.click();
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      setApiKey('');
+      showToast(t.settings.cleared, 'success');
+      setTimeout(() => { window.location.hash = '#/settings'; location.reload(); }, 800);
+    });
+  }
+
+  if (clearDataBtn) {
+    clearDataBtn.addEventListener('click', () => {
+      if (confirm(t.settings.clearConfirm)) {
+        localStorage.removeItem('motionmind_lessons');
+        showToast(t.settings.dataCleared, 'success');
+      }
+    });
   }
 }
