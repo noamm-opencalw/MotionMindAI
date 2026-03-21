@@ -11,10 +11,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// EF Core — PostgreSQL
-// Connection string from appsettings.json or env var:  ConnectionStrings__DefaultConnection
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Database — SQLite for dev, PostgreSQL for prod
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite("Data Source=motionmind.db"));
+}
+else
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
+
+// Repositories
+builder.Services.AddScoped<ILessonPlanRepository, LessonPlanRepository>();
 
 // AI Generation
 // Use GeminiAIGenerationService when Gemini:ApiKey is configured, otherwise fall back to Mock
@@ -33,6 +43,12 @@ else
 // ── Pipeline ──────────────────────────────────────────────────────────────────
 
 var app = builder.Build();
+
+// Initialize database
+using (var scope = app.Services.CreateScope())
+{
+    await MotionMind.Api.DatabaseInitializer.InitializeAsync(scope.ServiceProvider);
+}
 
 if (app.Environment.IsDevelopment())
 {
