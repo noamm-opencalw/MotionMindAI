@@ -7,6 +7,7 @@ import {
   iconBodyweight, iconMat, iconBall, iconBand, iconRoller, iconWeights,
   iconRing, iconChair, iconWall, iconHoop, iconRope, iconBench,
   iconMusic, iconRefresh, iconChevronUp, iconChevronDown, iconNote, iconGrip,
+  iconTrash,
 } from './icons.js';
 
 // Exercise card for the timeline
@@ -101,9 +102,8 @@ export function lessonCard(lesson) {
     : '';
 
   return `
-    <a href="#/lesson/${lesson.id}" class="card card--interactive card--accent-start lesson-card"
-       style="border-inline-start-color: ${categoryColor(lesson.focusArea || '')}">
-      <div class="card__body lesson-card">
+    <div class="card card--interactive card--accent-start lesson-card" style="border-inline-start-color: ${categoryColor(lesson.focusArea || '')};position:relative">
+      <a href="#/lesson/${lesson.id}" class="card__body lesson-card" style="text-decoration:none;color:inherit">
         <div class="lesson-card__title">${lesson.title || ''}</div>
         <div class="lesson-card__meta">
           ${focusBadges}
@@ -111,19 +111,14 @@ export function lessonCard(lesson) {
         </div>
         <div class="lesson-card__footer">
           <div class="lesson-card__stats">
-            <span class="meta-item">
-              ${iconClock()}
-              <span>${lesson.durationMinutes} ${t.lessons.minutes}</span>
-            </span>
-            <span class="meta-item">
-              ${iconExercise()}
-              <span>${exerciseCount} ${t.lessons.exercises}</span>
-            </span>
+            <span class="meta-item">${iconClock()}<span>${lesson.durationMinutes} ${t.lessons.minutes}</span></span>
+            <span class="meta-item">${iconExercise()}<span>${exerciseCount} ${t.lessons.exercises}</span></span>
             ${equipmentCount}
           </div>
         </div>
-      </div>
-    </a>
+      </a>
+      <button type="button" class="lesson-delete-btn" data-lesson-id="${lesson.id}" title="מחק">${iconTrash()}</button>
+    </div>
   `;
 }
 

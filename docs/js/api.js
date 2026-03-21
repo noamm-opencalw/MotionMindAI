@@ -46,6 +46,27 @@ function getNextId() {
 }
 
 // =============================
+// PROGRAM STORAGE (localStorage)
+// =============================
+function getProgramsFromStorage() {
+  try {
+    return JSON.parse(localStorage.getItem('motionmind_programs') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveProgramsToStorage(programs) {
+  localStorage.setItem('motionmind_programs', JSON.stringify(programs));
+}
+
+function getNextProgramId() {
+  const programs = getProgramsFromStorage();
+  if (programs.length === 0) return 1;
+  return Math.max(...programs.map(p => p.id)) + 1;
+}
+
+// =============================
 // GEMINI DIRECT API CALL
 // =============================
 function buildPrompt({ targetAge, focusAreas, durationMinutes, equipment }) {
@@ -135,6 +156,85 @@ Rules:
 - Keep category values in English`;
 }
 
+function buildProgramPrompt(params) {
+  return `You are an elite certified personal trainer and sports scientist.
+Build a comprehensive, periodized training program in valid JSON.
+
+Client Profile:
+- Goal: ${params.goal}${params.goalCustom ? ` (${params.goalCustom})` : ''}
+- Gender: ${params.gender === 'male' ? 'Male' : 'Female'}
+- Age: ${params.age || 'Not specified'}
+- Current weight: ${params.weight ? params.weight + ' kg' : 'Not specified'}
+- Fitness level: ${params.fitnessLevel}
+- Training location: ${params.location}
+- Available equipment: ${params.equipment && params.equipment.length > 0 ? params.equipment.join(', ') : 'bodyweight only'}
+- Training days per week: ${params.daysPerWeek}
+- Session duration: ${params.sessionDuration} minutes
+- Timeframe: ${params.timeframe}
+- Limitations/injuries: ${params.limitations || 'None'}
+
+Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
+{
+  "title": "string (in Hebrew - program title)",
+  "description": "string (in Hebrew - 2-3 sentence overview of the program approach)",
+  "totalWeeks": number,
+  "daysPerWeek": number,
+  "phases": [
+    {
+      "name": "string (in Hebrew - phase name, e.g. שלב התאמה)",
+      "weekStart": number,
+      "weekEnd": number,
+      "focus": "string (in Hebrew - phase focus description)",
+      "intensity": "low | moderate | high | very-high"
+    }
+  ],
+  "weeks": [
+    {
+      "weekNumber": number,
+      "theme": "string (in Hebrew - week theme/focus)",
+      "days": [
+        {
+          "dayNumber": number (1=Sunday, 7=Saturday),
+          "type": "training | rest | active-recovery",
+          "title": "string (in Hebrew - e.g. אימון כוח עליון / יום מנוחה)",
+          "focus": "string (in Hebrew - brief focus description, empty for rest days)",
+          "duration": number (minutes, 0 for rest days),
+          "exercises": [
+            {
+              "name": "string (in Hebrew)",
+              "sets": number,
+              "reps": "string (e.g. '12' or '30 שניות' or '8-12')",
+              "rest": "string (e.g. '60 שניות')",
+              "notes": "string (in Hebrew - form cues)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "nutrition": {
+    "calories": "string (in Hebrew - daily calorie recommendation)",
+    "protein": "string (in Hebrew - protein recommendation)",
+    "tips": ["string (in Hebrew - 3-4 nutrition tips)"]
+  },
+  "tips": ["string (in Hebrew - 3-5 general program tips)"]
+}
+
+Rules:
+- IMPORTANT: All text fields MUST be in Hebrew
+- Build a proper periodized program with progressive overload
+- Include rest days and active recovery days appropriately
+- For rest days, set type to "rest", exercises to empty array
+- For active recovery, include light activities (walking, stretching)
+- Adapt exercises to the available equipment and location
+- Consider the client's limitations/injuries in exercise selection
+- Include warm-up and cool-down in each training day
+- Progress intensity gradually across phases
+- For programs longer than 4 weeks, only detail the first 4 weeks fully, then provide a summary pattern for remaining weeks
+- Each training day should have 5-8 exercises
+- Provide realistic and safe progression`;
+}
+
 async function callGemini(prompt) {
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('NO_API_KEY');
@@ -203,10 +303,9 @@ export async function testConnection() {
 }
 
 // =============================
-// PUBLIC API
+// LESSON API
 // =============================
 export async function generateLesson({ targetAge, focusAreas, durationMinutes, equipment }) {
-  // If a backend API is configured, use it
   if (API_BASE) {
     const res = await fetch(`${API_BASE}/api/lessons/generate`, {
       method: 'POST',
@@ -217,11 +316,9 @@ export async function generateLesson({ targetAge, focusAreas, durationMinutes, e
     return res.json();
   }
 
-  // Call Gemini directly from the browser
   const prompt = buildPrompt({ targetAge, focusAreas, durationMinutes, equipment });
   const plan = await callGemini(prompt);
 
-  // Create a full lesson object
   const lesson = {
     id: getNextId(),
     title: plan.title,
@@ -244,11 +341,9 @@ export async function generateLesson({ targetAge, focusAreas, durationMinutes, e
     })),
   };
 
-  // Save to localStorage
   const lessons = getLessonsFromStorage();
   lessons.push(lesson);
   saveLessonsToStorage(lessons);
-
   return lesson;
 }
 
@@ -264,7 +359,6 @@ export async function regenerateExercise(lessonId, exerciseId, note) {
   const prompt = buildRegeneratePrompt(exercise, note, lesson);
   const newExercise = await callGemini(prompt);
 
-  // Replace the exercise
   lesson.exercises[exerciseIndex] = {
     ...lesson.exercises[exerciseIndex],
     name: newExercise.name,
@@ -278,16 +372,6 @@ export async function regenerateExercise(lessonId, exerciseId, note) {
 
   saveLessonsToStorage(lessons);
   return lesson;
-}
-
-export async function updateLesson(lessonId, updates) {
-  const lessons = getLessonsFromStorage();
-  const index = lessons.findIndex(l => l.id === Number(lessonId));
-  if (index === -1) throw new Error('Lesson not found');
-
-  lessons[index] = { ...lessons[index], ...updates };
-  saveLessonsToStorage(lessons);
-  return lessons[index];
 }
 
 export async function updateExerciseNote(lessonId, exerciseId, note) {
@@ -320,7 +404,6 @@ export async function getAllLessons() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   }
-
   return getLessonsFromStorage();
 }
 
@@ -330,15 +413,54 @@ export async function getLessonById(id) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   }
-
   const lessons = getLessonsFromStorage();
   return lessons.find(l => l.id === Number(id)) || null;
 }
 
 export async function deleteLesson(id) {
-  if (API_BASE) return; // Not implemented in backend
-
   const lessons = getLessonsFromStorage();
   const filtered = lessons.filter(l => l.id !== Number(id));
   saveLessonsToStorage(filtered);
+}
+
+// =============================
+// TRAINING PROGRAM API
+// =============================
+export async function generateProgram(params) {
+  const prompt = buildProgramPrompt(params);
+  const plan = await callGemini(prompt);
+
+  const program = {
+    id: getNextProgramId(),
+    createdAt: new Date().toISOString(),
+    params,
+    title: plan.title,
+    description: plan.description,
+    totalWeeks: plan.totalWeeks,
+    daysPerWeek: plan.daysPerWeek,
+    phases: plan.phases || [],
+    weeks: plan.weeks || [],
+    nutrition: plan.nutrition || null,
+    tips: plan.tips || [],
+  };
+
+  const programs = getProgramsFromStorage();
+  programs.push(program);
+  saveProgramsToStorage(programs);
+  return program;
+}
+
+export function getAllPrograms() {
+  return getProgramsFromStorage();
+}
+
+export function getProgramById(id) {
+  const programs = getProgramsFromStorage();
+  return programs.find(p => p.id === Number(id)) || null;
+}
+
+export function deleteProgram(id) {
+  const programs = getProgramsFromStorage();
+  const filtered = programs.filter(p => p.id !== Number(id));
+  saveProgramsToStorage(filtered);
 }

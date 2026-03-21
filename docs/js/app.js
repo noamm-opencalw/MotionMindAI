@@ -1,10 +1,13 @@
 import { t } from './i18n.js';
-import { logoIcon, iconHome, iconSparkle, iconList, iconSettings } from './icons.js';
+import { logoIcon, iconHome, iconSparkle, iconList, iconSettings, iconTarget } from './icons.js';
 import {
   renderHome,
   renderGenerate, initGenerate,
   renderLessons, initLessons,
   renderLessonDetail, initLessonDetail,
+  renderProgramCreate, initProgramCreate,
+  renderPrograms, initPrograms,
+  renderProgramDetail, initProgramDetail,
   renderSettings, initSettings,
 } from './views.js';
 
@@ -16,6 +19,9 @@ const routes = [
   { pattern: /^#\/generate$/, view: 'generate' },
   { pattern: /^#\/lessons$/, view: 'lessons' },
   { pattern: /^#\/lesson\/(\d+)$/, view: 'detail' },
+  { pattern: /^#\/program$/, view: 'programCreate' },
+  { pattern: /^#\/programs$/, view: 'programs' },
+  { pattern: /^#\/program\/(\d+)$/, view: 'programDetail' },
   { pattern: /^#\/settings$/, view: 'settings' },
 ];
 
@@ -32,7 +38,6 @@ async function navigate() {
   const { view, params } = matchRoute(window.location.hash);
   const app = document.getElementById('app');
 
-  // Render view HTML
   switch (view) {
     case 'home':
       app.innerHTML = renderHome();
@@ -49,26 +54,32 @@ async function navigate() {
       app.innerHTML = renderLessonDetail();
       initLessonDetail(params[0]);
       break;
+    case 'programCreate':
+      app.innerHTML = renderProgramCreate();
+      initProgramCreate();
+      break;
+    case 'programs':
+      app.innerHTML = renderPrograms();
+      initPrograms();
+      break;
+    case 'programDetail':
+      app.innerHTML = renderProgramDetail();
+      initProgramDetail(params[0]);
+      break;
     case 'settings':
       app.innerHTML = renderSettings();
       initSettings();
       break;
   }
 
-  // Update active nav item
   updateNav(view);
-
-  // Scroll to top
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function updateNav(activeView) {
-  // Bottom nav
   document.querySelectorAll('.bottom-nav__item').forEach(item => {
     item.classList.toggle('active', item.dataset.view === activeView);
   });
-
-  // Desktop nav
   document.querySelectorAll('.header__nav-item').forEach(item => {
     item.classList.toggle('active', item.dataset.view === activeView);
   });
@@ -78,7 +89,6 @@ function updateNav(activeView) {
 // APP SHELL
 // =============================
 function createAppShell() {
-  // Header
   const header = document.querySelector('.header__inner');
   if (header) {
     header.innerHTML = `
@@ -89,6 +99,7 @@ function createAppShell() {
       <nav class="header__nav" style="display:none">
         <a href="#/" class="header__nav-item" data-view="home">${t.nav.home}</a>
         <a href="#/generate" class="header__nav-item" data-view="generate">${t.nav.generate}</a>
+        <a href="#/program" class="header__nav-item" data-view="programCreate">${t.nav.program}</a>
         <a href="#/lessons" class="header__nav-item" data-view="lessons">${t.nav.lessons}</a>
         <a href="#/settings" class="header__nav-item" data-view="settings">${t.settings.title}</a>
       </nav>
@@ -98,7 +109,6 @@ function createAppShell() {
       </div>
     `;
 
-    // Show desktop nav on larger screens
     const checkDesktopNav = () => {
       const nav = header.querySelector('.header__nav');
       if (nav) nav.style.display = window.innerWidth >= 1024 ? 'flex' : 'none';
@@ -107,7 +117,6 @@ function createAppShell() {
     window.addEventListener('resize', checkDesktopNav);
   }
 
-  // Bottom nav
   const bottomNav = document.getElementById('bottom-nav');
   if (bottomNav) {
     bottomNav.innerHTML = `
@@ -118,6 +127,10 @@ function createAppShell() {
       <a href="#/generate" class="bottom-nav__item" data-view="generate">
         ${iconSparkle()}
         <span>${t.nav.generate}</span>
+      </a>
+      <a href="#/program" class="bottom-nav__item" data-view="programCreate">
+        ${iconTarget()}
+        <span>${t.nav.program}</span>
       </a>
       <a href="#/lessons" class="bottom-nav__item" data-view="lessons">
         ${iconList()}

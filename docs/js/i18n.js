@@ -6,12 +6,14 @@ export const t = {
     home: 'ראשי',
     generate: 'יצירה',
     lessons: 'התוכניות שלי',
+    program: 'תוכנית אימונים',
   },
 
   hero: {
     title: 'תוכניות אימון מותאמות אישית בלחיצת כפתור',
     subtitle: 'בינה מלאכותית שמבינה תנועה — יוצרת תוכניות פילאטיס וחינוך גופני מקצועיות, עם תרגילים, זמנים והנחיות מאמן.',
     cta: 'צור תוכנית אימון',
+    ctaProgram: 'בנה תוכנית אימונים',
   },
 
   features: {
@@ -34,7 +36,7 @@ export const t = {
     steps: [
       {
         title: 'בחר פרמטרים',
-        desc: 'גיל, מכשירים, תחומי מיקוד, מוזיקה ומשך האימון',
+        desc: 'גיל, מכשירים, תחומי מיקוד ומשך האימון',
       },
       {
         title: 'הבינה המלאכותית יוצרת',
@@ -116,6 +118,8 @@ export const t = {
     },
     exercises: 'תרגילים',
     minutes: 'דקות',
+    deleteConfirm: 'האם למחוק את התוכנית?',
+    deleted: 'התוכנית נמחקה',
   },
 
   detail: {
@@ -142,6 +146,80 @@ export const t = {
     doneEditing: 'סיום עריכה',
     musicTitle: 'מוזיקה מומלצת',
     equipment: 'ציוד',
+  },
+
+  // Training Program module
+  program: {
+    title: 'בניית תוכנית אימונים',
+    subtitle: 'הגדר יעד, פרק זמן ומאפיינים — והבינה המלאכותית תבנה תוכנית מקיפה',
+    goalLabel: 'מהו היעד שלך?',
+    goalPlaceholder: 'לדוגמה: ירידה של 8 ק"ג, גיבוש לסיירת, עיצוב הגוף לקיץ...',
+    goals: [
+      { value: 'weight-loss', label: 'ירידה במשקל' },
+      { value: 'muscle-gain', label: 'עלייה במסת שריר' },
+      { value: 'toning', label: 'עיצוב ומיצוק' },
+      { value: 'military-prep', label: 'הכנה צבאית / גיבוש' },
+      { value: 'endurance', label: 'סיבולת ואירובי' },
+      { value: 'flexibility', label: 'גמישות ותנועתיות' },
+      { value: 'rehab', label: 'שיקום וחזרה לפעילות' },
+      { value: 'general-fitness', label: 'כושר כללי ובריאות' },
+    ],
+    goalCustomLabel: 'פרט את היעד (אופציונלי)',
+    timeframeLabel: 'פרק זמן',
+    timeframes: [
+      { value: '1-month', label: 'חודש' },
+      { value: '2-months', label: 'חודשיים' },
+      { value: '3-months', label: '3 חודשים' },
+      { value: '6-months', label: 'חצי שנה' },
+      { value: '12-months', label: 'שנה' },
+    ],
+    genderLabel: 'מין',
+    genders: [
+      { value: 'male', label: 'זכר' },
+      { value: 'female', label: 'נקבה' },
+    ],
+    fitnessLevelLabel: 'רמת כושר נוכחית',
+    fitnessLevels: [
+      { value: 'beginner', label: 'מתחיל — אין ניסיון קודם' },
+      { value: 'light', label: 'מתאמן קל — 1-2 פעמים בשבוע' },
+      { value: 'intermediate', label: 'בינוני — 3-4 פעמים בשבוע' },
+      { value: 'advanced', label: 'מתקדם — 5+ פעמים בשבוע' },
+    ],
+    locationLabel: 'מיקום אימון',
+    locations: [
+      { value: 'home', label: 'בבית' },
+      { value: 'gym', label: 'חדר כושר' },
+      { value: 'outdoor', label: 'בחוץ / פארק' },
+      { value: 'mixed', label: 'משולב' },
+    ],
+    equipmentLabel: 'ציוד זמין',
+    daysPerWeekLabel: 'ימי אימון בשבוע',
+    sessionDurationLabel: 'משך אימון ממוצע',
+    limitationsLabel: 'מגבלות / פציעות (אופציונלי)',
+    limitationsPlaceholder: 'לדוגמה: כאבי גב תחתון, בעיית ברך ימין...',
+    ageLabel: 'גיל',
+    agePlaceholder: 'לדוגמה: 28',
+    weightLabel: 'משקל נוכחי (ק"ג, אופציונלי)',
+    weightPlaceholder: 'לדוגמה: 78',
+    submit: 'בנה תוכנית אימונים',
+    loading: 'הבינה המלאכותית בונה תוכנית...',
+    loadingSub: 'מתכננת שבועות אימונים, ימי מנוחה ועלייה בעצימות',
+    // Detail view
+    listTitle: 'התוכניות שלי',
+    empty: {
+      title: 'עדיין לא נבנו תוכניות אימונים',
+      desc: 'בנה תוכנית מקיפה עם יעדים, לוח זמנים וימי מנוחה',
+      cta: 'בנה תוכנית ראשונה',
+    },
+    backToPrograms: 'חזרה לתוכניות',
+    weekLabel: 'שבוע',
+    dayLabel: 'יום',
+    restDay: 'יום מנוחה',
+    overview: 'סקירה כללית',
+    weeks: 'שבועות',
+    sessionsPerWeek: 'אימונים בשבוע',
+    deleted: 'התוכנית נמחקה',
+    deleteConfirm: 'האם למחוק את תוכנית האימונים?',
   },
 
   settings: {
@@ -175,6 +253,8 @@ export const t = {
     loadFailed: 'שגיאה בטעינת הנתונים. נסה שנית.',
     fillAll: 'יש לבחור קבוצת גיל ותחום מיקוד אחד לפחות',
     regenerateFailed: 'שגיאה ביצירת התרגיל מחדש. נסה שנית.',
+    programFillAll: 'יש למלא יעד, פרק זמן, מין ורמת כושר',
+    programFailed: 'שגיאה בבניית תוכנית האימונים. נסה שנית.',
   },
 
   toast: {
@@ -182,5 +262,6 @@ export const t = {
     exerciseRegenerated: 'התרגיל נוצר מחדש!',
     lessonUpdated: 'התוכנית עודכנה!',
     noteSaved: 'ההערה נשמרה!',
+    programCreated: 'תוכנית האימונים נבנתה בהצלחה!',
   },
 };
