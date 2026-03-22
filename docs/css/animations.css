@@ -110,6 +110,13 @@
   width: 40px;
   height: 40px;
   color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-rings__icon .material-symbols-outlined {
+  font-size: 36px;
 }
 
 @keyframes pulse-ring {

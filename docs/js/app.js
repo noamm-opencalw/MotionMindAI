@@ -1,5 +1,5 @@
 import { t } from './i18n.js';
-import { logoIcon, iconHome, iconSparkle, iconList, iconSettings, iconTarget } from './icons.js';
+import { logoIcon, iconHome, iconSparkle, iconList, iconSettings, iconTarget, iconNotifications } from './icons.js';
 import {
   renderHome,
   renderGenerate, initGenerate,
@@ -92,8 +92,13 @@ function createAppShell() {
   const header = document.querySelector('.header__inner');
   if (header) {
     header.innerHTML = `
-      <a href="#/" class="header__logo">
-        ${logoIcon()}
+      <div class="header__actions">
+        <span class="header__notification">${iconNotifications()}</span>
+        <div class="header__avatar">
+          <img src="motionmindai.png" alt="${t.appName}">
+        </div>
+      </div>
+      <a href="#/" class="header__logo" style="text-decoration:none">
         <span class="header__title">${t.appName}</span>
       </a>
       <nav class="header__nav" style="display:none">
@@ -103,9 +108,8 @@ function createAppShell() {
         <a href="#/lessons" class="header__nav-item" data-view="lessons">${t.nav.lessons}</a>
         <a href="#/settings" class="header__nav-item" data-view="settings">${t.settings.title}</a>
       </nav>
-      <div class="header__status">
-        <span class="header__status-dot"></span>
-        <span>${t.appTagline}</span>
+      <div class="header__back">
+        <span class="material-symbols-outlined">arrow_forward</span>
       </div>
     `;
 
@@ -121,23 +125,23 @@ function createAppShell() {
   if (bottomNav) {
     bottomNav.innerHTML = `
       <a href="#/" class="bottom-nav__item" data-view="home">
-        ${iconHome()}
+        <span class="material-symbols-outlined">home</span>
         <span>${t.nav.home}</span>
       </a>
       <a href="#/generate" class="bottom-nav__item" data-view="generate">
-        ${iconSparkle()}
+        <span class="material-symbols-outlined">fitness_center</span>
         <span>${t.nav.generate}</span>
       </a>
       <a href="#/program" class="bottom-nav__item" data-view="programCreate">
-        ${iconTarget()}
+        <span class="material-symbols-outlined">edit_calendar</span>
         <span>${t.nav.program}</span>
       </a>
       <a href="#/lessons" class="bottom-nav__item" data-view="lessons">
-        ${iconList()}
+        <span class="material-symbols-outlined">layers</span>
         <span>${t.nav.lessons}</span>
       </a>
       <a href="#/settings" class="bottom-nav__item" data-view="settings">
-        ${iconSettings()}
+        <span class="material-symbols-outlined">settings</span>
         <span>${t.settings.title}</span>
       </a>
     `;

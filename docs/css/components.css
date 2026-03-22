@@ -81,9 +81,18 @@
   flex-shrink: 0;
 }
 
+.btn .material-symbols-outlined {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
 .btn--lg svg {
   width: 24px;
   height: 24px;
+}
+
+.btn--lg .material-symbols-outlined {
+  font-size: 24px;
 }
 
 /* Shimmer effect for generate button */
@@ -231,6 +240,10 @@
   height: 18px;
 }
 
+.pill .material-symbols-outlined {
+  font-size: 18px;
+}
+
 /* ========================
    FOCUS CARD SELECTOR
    ======================== */
@@ -272,8 +285,16 @@
   transition: color var(--transition-fast);
 }
 
+.focus-card .material-symbols-outlined {
+  font-size: 32px;
+  color: var(--color-text-tertiary);
+  transition: color var(--transition-fast);
+}
+
 .focus-card:hover svg,
-.focus-card.active svg {
+.focus-card.active svg,
+.focus-card:hover .material-symbols-outlined,
+.focus-card.active .material-symbols-outlined {
   color: var(--color-primary);
 }
 
@@ -434,6 +455,11 @@
   color: var(--color-text-tertiary);
 }
 
+.meta-item .material-symbols-outlined {
+  font-size: 16px;
+  color: var(--color-text-tertiary);
+}
+
 /* ========================
    SECTION TITLE
    ======================== */
@@ -493,8 +519,16 @@
   transition: color var(--transition-fast);
 }
 
+.equipment-card .material-symbols-outlined {
+  font-size: 24px;
+  color: var(--color-text-tertiary);
+  transition: color var(--transition-fast);
+}
+
 .equipment-card:hover svg,
-.equipment-card.active svg {
+.equipment-card.active svg,
+.equipment-card:hover .material-symbols-outlined,
+.equipment-card.active .material-symbols-outlined {
   color: var(--color-secondary);
 }
 
@@ -560,4 +594,8 @@
 .btn--sm svg {
   width: 16px;
   height: 16px;
+}
+
+.btn--sm .material-symbols-outlined {
+  font-size: 16px;
 }

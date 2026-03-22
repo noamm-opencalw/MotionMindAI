@@ -3,10 +3,10 @@ export const t = {
   appTagline: 'תוכניות אימון חכמות',
 
   nav: {
-    home: 'ראשי',
-    generate: 'יצירה',
+    home: 'בית',
+    generate: 'אימונים',
     lessons: 'התוכניות שלי',
-    program: 'תוכנית אימונים',
+    program: 'תכנון',
   },
 
   hero: {

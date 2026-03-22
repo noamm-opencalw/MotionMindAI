@@ -1,53 +1,89 @@
 :root {
-  /* Primary palette */
-  --color-primary: #2563EB;
-  --color-primary-hover: #1D4ED8;
-  --color-primary-light: #DBEAFE;
-  --color-primary-50: #EFF6FF;
-  --color-secondary: #7C3AED;
-  --color-secondary-hover: #6D28D9;
-  --color-secondary-light: #EDE9FE;
+  /* ========================
+     MATERIAL DESIGN 3 — Teal/Rose Theme
+     ======================== */
+
+  /* Primary (Teal) */
+  --color-primary: #005e53;
+  --color-primary-hover: #00796b;
+  --color-primary-light: #97f3e2;
+  --color-primary-50: #e0f2f1;
+  --color-primary-container: #00796b;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #a1feec;
+  --color-primary-fixed: #97f3e2;
+  --color-primary-fixed-dim: #7ad7c6;
+  --color-inverse-primary: #7ad7c6;
+
+  /* Secondary (Rose) */
+  --color-secondary: #825151;
+  --color-secondary-hover: #673a3b;
+  --color-secondary-light: #ffdad9;
+  --color-secondary-container: #ffbfbf;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #7b4b4b;
+
+  /* Tertiary (Green) */
+  --color-tertiary: #475838;
+  --color-tertiary-container: #5f714e;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #e0f4c9;
 
   /* Surfaces */
-  --color-bg: #F8FAFC;
-  --color-surface: #FFFFFF;
-  --color-surface-hover: #F1F5F9;
-  --color-border: #E2E8F0;
-  --color-border-light: #F1F5F9;
+  --color-bg: #fbf9f9;
+  --color-surface: #fbf9f9;
+  --color-surface-hover: #efeded;
+  --color-surface-bright: #fbf9f9;
+  --color-surface-dim: #dbdad9;
+  --color-surface-container: #efeded;
+  --color-surface-container-low: #f5f3f3;
+  --color-surface-container-high: #e9e8e7;
+  --color-surface-container-highest: #e3e2e2;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-variant: #e3e2e2;
+  --color-surface-tint: #006b5e;
+  --color-border: #bdc9c5;
+  --color-border-light: #e3e2e2;
 
   /* Text */
-  --color-text: #0F172A;
-  --color-text-secondary: #64748B;
-  --color-text-tertiary: #94A3B8;
-  --color-text-inverse: #FFFFFF;
+  --color-text: #1b1c1c;
+  --color-text-secondary: #3e4946;
+  --color-text-tertiary: #6e7a76;
+  --color-text-inverse: #ffffff;
+  --color-on-background: #1b1c1c;
+  --color-on-surface: #1b1c1c;
+  --color-on-surface-variant: #3e4946;
+  --color-outline: #6e7a76;
+  --color-outline-variant: #bdc9c5;
 
   /* Status */
   --color-success: #059669;
-  --color-success-light: #D1FAE5;
-  --color-error: #DC2626;
-  --color-error-light: #FEE2E2;
-  --color-warning: #D97706;
+  --color-success-light: #d1fae5;
+  --color-error: #ba1a1a;
+  --color-error-light: #ffdad6;
+  --color-warning: #d97706;
 
   /* Exercise categories */
-  --color-warmup: #F59E0B;
-  --color-warmup-light: #FEF3C7;
-  --color-core: #EF4444;
-  --color-core-light: #FEE2E2;
-  --color-strength: #2563EB;
-  --color-strength-light: #DBEAFE;
-  --color-flexibility: #8B5CF6;
-  --color-flexibility-light: #EDE9FE;
-  --color-cooldown: #06B6D4;
-  --color-cooldown-light: #CFFAFE;
+  --color-warmup: #e6a23c;
+  --color-warmup-light: #fef3c7;
+  --color-core: #e74c3c;
+  --color-core-light: #fde8e8;
+  --color-strength: #00796b;
+  --color-strength-light: #e0f2f1;
+  --color-flexibility: #7c5cbf;
+  --color-flexibility-light: #ede9fe;
+  --color-cooldown: #0891b2;
+  --color-cooldown-light: #cffafe;
 
-  /* Gradients */
-  --gradient-hero: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 40%, #7C3AED 100%);
-  --gradient-button: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
-  --gradient-button-hover: linear-gradient(135deg, #1D4ED8 0%, #6D28D9 100%);
-  --gradient-card-accent: linear-gradient(180deg, #2563EB 0%, #7C3AED 100%);
+  /* Gradients — Teal */
+  --gradient-hero: linear-gradient(135deg, #004d40 0%, #00796b 40%, #009688 100%);
+  --gradient-button: linear-gradient(135deg, #005e53 0%, #00796b 100%);
+  --gradient-button-hover: linear-gradient(135deg, #004d40 0%, #005e53 100%);
+  --gradient-card-accent: linear-gradient(180deg, #005e53 0%, #00796b 100%);
 
   /* Typography */
-  --font-family: 'Heebo', sans-serif;
+  --font-family: 'Lexend', 'Heebo', sans-serif;
+  --font-family-hebrew: 'Heebo', sans-serif;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -64,6 +100,7 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --font-weight-extrabold: 800;
+  --font-weight-black: 900;
 
   /* Spacing (8px base) */
   --space-0: 0;
@@ -85,6 +122,7 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
+  --radius-2xl: 32px;
   --radius-full: 9999px;
 
   /* Shadows */
@@ -93,8 +131,9 @@
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
   --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.04);
-  --shadow-glow: 0 0 20px rgba(37,99,235,0.3);
-  --shadow-glow-secondary: 0 0 20px rgba(124,58,237,0.3);
+  --shadow-glow: 0 0 20px rgba(0,94,83,0.3);
+  --shadow-glow-secondary: 0 0 20px rgba(130,81,81,0.3);
+  --shadow-nav: 0 -4px 24px rgba(0,0,0,0.04);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -107,8 +146,8 @@
   --z-overlay: 150;
 
   /* Layout */
-  --nav-height: 64px;
-  --header-height: 56px;
+  --nav-height: 72px;
+  --header-height: 64px;
   --max-width: 1200px;
   --content-max-width: 640px;
 }
