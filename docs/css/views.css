@@ -11,7 +11,7 @@
   overflow: hidden;
   margin-top: calc(-1 * var(--header-height) - var(--space-4));
   padding-top: calc(var(--header-height) + var(--space-12));
-  clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 92%, 0% 100%);
 }
 
 .hero::before {

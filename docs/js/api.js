@@ -1,69 +1,45 @@
+import { supabase, getUser, isAdmin } from './auth.js';
+
 // =============================
 // CONFIGURATION
 // =============================
-const API_BASE = ''; // Set to deployed API URL if available
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 // =============================
-// API KEY MANAGEMENT (localStorage)
+// API KEY MANAGEMENT (Supabase app_settings)
 // =============================
-export function getApiKey() {
-  return localStorage.getItem('motionmind_gemini_key') || '';
+let cachedApiKey = '';
+
+export async function loadApiKey() {
+  const { data } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'gemini_api_key')
+    .single();
+  cachedApiKey = data?.value || '';
 }
 
-export function setApiKey(key) {
+export function getApiKey() {
+  return cachedApiKey;
+}
+
+export async function setApiKey(key) {
   if (key) {
-    localStorage.setItem('motionmind_gemini_key', key.trim());
+    const { error } = await supabase.from('app_settings').upsert(
+      { key: 'gemini_api_key', value: key.trim(), updated_by: getUser().id, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    );
+    if (error) throw error;
+    cachedApiKey = key.trim();
   } else {
-    localStorage.removeItem('motionmind_gemini_key');
+    await supabase.from('app_settings').delete().eq('key', 'gemini_api_key');
+    cachedApiKey = '';
   }
 }
 
 export function hasApiKey() {
-  return getApiKey().length > 0;
-}
-
-// =============================
-// LESSON STORAGE (localStorage)
-// =============================
-function getLessonsFromStorage() {
-  try {
-    return JSON.parse(localStorage.getItem('motionmind_lessons') || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveLessonsToStorage(lessons) {
-  localStorage.setItem('motionmind_lessons', JSON.stringify(lessons));
-}
-
-function getNextId() {
-  const lessons = getLessonsFromStorage();
-  if (lessons.length === 0) return 1;
-  return Math.max(...lessons.map(l => l.id)) + 1;
-}
-
-// =============================
-// PROGRAM STORAGE (localStorage)
-// =============================
-function getProgramsFromStorage() {
-  try {
-    return JSON.parse(localStorage.getItem('motionmind_programs') || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveProgramsToStorage(programs) {
-  localStorage.setItem('motionmind_programs', JSON.stringify(programs));
-}
-
-function getNextProgramId() {
-  const programs = getProgramsFromStorage();
-  if (programs.length === 0) return 1;
-  return Math.max(...programs.map(p => p.id)) + 1;
+  return cachedApiKey.length > 0;
 }
 
 // =============================
@@ -307,24 +283,13 @@ export async function testConnection() {
 }
 
 // =============================
-// LESSON API
+// LESSON API (Supabase)
 // =============================
 export async function generateLesson({ targetAge, gender, focusAreas, durationMinutes, equipment }) {
-  if (API_BASE) {
-    const res = await fetch(`${API_BASE}/api/lessons/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetAge, focusArea: focusAreas, durationMinutes }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
-
   const prompt = buildPrompt({ targetAge, gender, focusAreas, durationMinutes, equipment });
   const plan = await callGemini(prompt);
 
-  const lesson = {
-    id: getNextId(),
+  const lessonData = {
     title: plan.title,
     targetAgeGroup: targetAge,
     focusArea: Array.isArray(focusAreas) ? focusAreas[0] : focusAreas,
@@ -345,15 +310,18 @@ export async function generateLesson({ targetAge, gender, focusAreas, durationMi
     })),
   };
 
-  const lessons = getLessonsFromStorage();
-  lessons.push(lesson);
-  saveLessonsToStorage(lessons);
-  return lesson;
+  const { data, error } = await supabase
+    .from('lessons')
+    .insert({ user_id: getUser().id, data: lessonData })
+    .select()
+    .single();
+  if (error) throw error;
+
+  return { ...lessonData, id: data.id };
 }
 
 export async function regenerateExercise(lessonId, exerciseId, note) {
-  const lessons = getLessonsFromStorage();
-  const lesson = lessons.find(l => l.id === Number(lessonId));
+  const lesson = await getLessonById(lessonId);
   if (!lesson) throw new Error('Lesson not found');
 
   const exerciseIndex = lesson.exercises.findIndex(e => e.id === Number(exerciseId));
@@ -374,68 +342,77 @@ export async function regenerateExercise(lessonId, exerciseId, note) {
     note: '',
   };
 
-  saveLessonsToStorage(lessons);
+  const { id, ...lessonData } = lesson;
+  await supabase.from('lessons')
+    .update({ data: lessonData, updated_at: new Date().toISOString() })
+    .eq('id', lessonId);
+
   return lesson;
 }
 
 export async function updateExerciseNote(lessonId, exerciseId, note) {
-  const lessons = getLessonsFromStorage();
-  const lesson = lessons.find(l => l.id === Number(lessonId));
+  const lesson = await getLessonById(lessonId);
   if (!lesson) throw new Error('Lesson not found');
 
   const exercise = lesson.exercises.find(e => e.id === Number(exerciseId));
   if (!exercise) throw new Error('Exercise not found');
 
   exercise.note = note;
-  saveLessonsToStorage(lessons);
+  const { id, ...lessonData } = lesson;
+  await supabase.from('lessons')
+    .update({ data: lessonData, updated_at: new Date().toISOString() })
+    .eq('id', lessonId);
+
   return lesson;
 }
 
 export async function reorderExercises(lessonId, exerciseIds) {
-  const lessons = getLessonsFromStorage();
-  const lesson = lessons.find(l => l.id === Number(lessonId));
+  const lesson = await getLessonById(lessonId);
   if (!lesson) throw new Error('Lesson not found');
 
-  const reordered = exerciseIds.map(id => lesson.exercises.find(e => e.id === Number(id))).filter(Boolean);
+  const reordered = exerciseIds.map(eid => lesson.exercises.find(e => e.id === Number(eid))).filter(Boolean);
   lesson.exercises = reordered;
-  saveLessonsToStorage(lessons);
+
+  const { id, ...lessonData } = lesson;
+  await supabase.from('lessons')
+    .update({ data: lessonData, updated_at: new Date().toISOString() })
+    .eq('id', lessonId);
+
   return lesson;
 }
 
 export async function getAllLessons() {
-  if (API_BASE) {
-    const res = await fetch(`${API_BASE}/api/lessons`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
-  return getLessonsFromStorage();
+  const { data, error } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('user_id', getUser().id)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data.map(row => ({ ...row.data, id: row.id }));
 }
 
 export async function getLessonById(id) {
-  if (API_BASE) {
-    const res = await fetch(`${API_BASE}/api/lessons/${id}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
-  const lessons = getLessonsFromStorage();
-  return lessons.find(l => l.id === Number(id)) || null;
+  const { data, error } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error || !data) return null;
+  return { ...data.data, id: data.id };
 }
 
 export async function deleteLesson(id) {
-  const lessons = getLessonsFromStorage();
-  const filtered = lessons.filter(l => l.id !== Number(id));
-  saveLessonsToStorage(filtered);
+  await supabase.from('lessons').delete().eq('id', id);
 }
 
 // =============================
-// TRAINING PROGRAM API
+// TRAINING PROGRAM API (Supabase)
 // =============================
 export async function generateProgram(params) {
   const prompt = buildProgramPrompt(params);
   const plan = await callGemini(prompt);
 
-  const program = {
-    id: getNextProgramId(),
+  const programData = {
     createdAt: new Date().toISOString(),
     params,
     title: plan.title,
@@ -448,23 +425,80 @@ export async function generateProgram(params) {
     tips: plan.tips || [],
   };
 
-  const programs = getProgramsFromStorage();
-  programs.push(program);
-  saveProgramsToStorage(programs);
-  return program;
+  const { data, error } = await supabase
+    .from('programs')
+    .insert({ user_id: getUser().id, data: programData })
+    .select()
+    .single();
+  if (error) throw error;
+
+  return { ...programData, id: data.id };
 }
 
-export function getAllPrograms() {
-  return getProgramsFromStorage();
+export async function getAllPrograms() {
+  const { data, error } = await supabase
+    .from('programs')
+    .select('*')
+    .eq('user_id', getUser().id)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data.map(row => ({ ...row.data, id: row.id }));
 }
 
-export function getProgramById(id) {
-  const programs = getProgramsFromStorage();
-  return programs.find(p => p.id === Number(id)) || null;
+export async function getProgramById(id) {
+  const { data, error } = await supabase
+    .from('programs')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error || !data) return null;
+  return { ...data.data, id: data.id };
 }
 
-export function deleteProgram(id) {
-  const programs = getProgramsFromStorage();
-  const filtered = programs.filter(p => p.id !== Number(id));
-  saveProgramsToStorage(filtered);
+export async function deleteProgram(id) {
+  await supabase.from('programs').delete().eq('id', id);
+}
+
+// =============================
+// ADMIN FUNCTIONS
+// =============================
+export async function getAllUsers() {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function toggleUserLock(userId, lock) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_locked: lock, updated_at: new Date().toISOString() })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+export async function deleteUser(userId) {
+  const { error } = await supabase
+    .from('profiles')
+    .delete()
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+export async function getUserLessonsCount(userId) {
+  const { count } = await supabase
+    .from('lessons')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+  return count || 0;
+}
+
+export async function getUserProgramsCount(userId) {
+  const { count } = await supabase
+    .from('programs')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+  return count || 0;
 }
