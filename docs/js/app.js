@@ -95,6 +95,10 @@ function updateNav(activeView) {
   document.querySelectorAll('.header__nav-item').forEach(item => {
     item.classList.toggle('active', item.dataset.view === activeView);
   });
+  const backBtn = document.querySelector('.header__back');
+  if (backBtn) {
+    backBtn.style.display = activeView === 'home' ? 'none' : '';
+  }
 }
 
 // =============================
@@ -152,6 +156,9 @@ function createAppShell() {
 
     // Logout button
     document.getElementById('logout-btn')?.addEventListener('click', () => signOut());
+
+    // Back button
+    header.querySelector('.header__back')?.addEventListener('click', () => history.back());
 
     const checkDesktopNav = () => {
       const nav = header.querySelector('.header__nav');

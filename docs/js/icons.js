@@ -54,7 +54,7 @@ export function iconRing() { return ms('circle'); }
 export function iconChair() { return ms('chair'); }
 export function iconWall() { return ms('grid_on'); }
 export function iconHoop() { return ms('radio_button_unchecked'); }
-export function iconRope() { return ms('lasso'); }
+export function iconRope() { return ms('straighten'); }
 export function iconBench() { return ms('table_restaurant'); }
 
 // Utility icons
