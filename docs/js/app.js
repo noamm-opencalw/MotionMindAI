@@ -95,7 +95,7 @@ function createAppShell() {
       <div class="header__actions">
         <span class="header__notification">${iconNotifications()}</span>
         <div class="header__avatar">
-          <img src="motionmindai.png" alt="${t.appName}">
+          <img src="MotionMindAI_nobg.png" alt="${t.appName}">
         </div>
       </div>
       <a href="#/" class="header__logo" style="text-decoration:none">

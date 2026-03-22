@@ -51,7 +51,7 @@ export function renderHome() {
         </div>
         <div class="hero__content">
           <div class="hero__logo">
-            <img src="motionmindai.png" alt="${t.appName}" class="hero__logo-img" />
+            <img src="MotionMindAI_nobg.png" alt="${t.appName}" class="hero__logo-img" />
           </div>
           <h1 class="hero__title">${t.hero.title}</h1>
           <p class="hero__subtitle">${t.hero.subtitle}</p>

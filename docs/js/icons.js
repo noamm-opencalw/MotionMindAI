@@ -127,7 +127,7 @@ export function emptyStateIllustration() {
 
 // Logo icon - PNG image
 export function logoIcon() {
-  return `<img src="motionmindai.png" alt="פאר טוסיק" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">`;
+  return `<img src="MotionMindAI_nobg.png" alt="פאר טוסיק" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">`;
 }
 
 // Category icon mapper
