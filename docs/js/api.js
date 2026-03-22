@@ -69,10 +69,13 @@ function getNextProgramId() {
 // =============================
 // GEMINI DIRECT API CALL
 // =============================
-function buildPrompt({ targetAge, focusAreas, durationMinutes, equipment }) {
+function buildPrompt({ targetAge, gender, focusAreas, durationMinutes, equipment }) {
   const equipmentLine = equipment && equipment.length > 0
     ? `- Available equipment: ${equipment.join(', ')}`
     : '- Available equipment: none (bodyweight only)';
+
+  const genderMap = { male: 'men', female: 'women', mixed: 'mixed group (men and women)' };
+  const genderLine = gender ? `- Target audience: ${genderMap[gender] || gender}` : '';
 
   const focusLine = Array.isArray(focusAreas)
     ? `- Focus areas: ${focusAreas.join(', ')}`
@@ -83,6 +86,7 @@ Generate a structured lesson plan in valid JSON.
 
 Parameters:
 - Target age group: ${targetAge}
+${genderLine}
 ${focusLine}
 - Total duration: ${durationMinutes} minutes
 ${equipmentLine}
@@ -305,7 +309,7 @@ export async function testConnection() {
 // =============================
 // LESSON API
 // =============================
-export async function generateLesson({ targetAge, focusAreas, durationMinutes, equipment }) {
+export async function generateLesson({ targetAge, gender, focusAreas, durationMinutes, equipment }) {
   if (API_BASE) {
     const res = await fetch(`${API_BASE}/api/lessons/generate`, {
       method: 'POST',
@@ -316,7 +320,7 @@ export async function generateLesson({ targetAge, focusAreas, durationMinutes, e
     return res.json();
   }
 
-  const prompt = buildPrompt({ targetAge, focusAreas, durationMinutes, equipment });
+  const prompt = buildPrompt({ targetAge, gender, focusAreas, durationMinutes, equipment });
   const plan = await callGemini(prompt);
 
   const lesson = {

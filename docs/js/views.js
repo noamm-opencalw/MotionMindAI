@@ -134,6 +134,13 @@ export function renderGenerate() {
           </div></div></div>
 
           <div class="card generate-card"><div class="card__body"><div class="form-group">
+            <label class="form-label">${t.generate.genderLabel}</label>
+            <div class="pill-group" data-field="gender">
+              ${t.generate.genderOptions.map(opt => `<button type="button" class="pill" data-value="${opt.value}">${opt.label}</button>`).join('')}
+            </div>
+          </div></div></div>
+
+          <div class="card generate-card"><div class="card__body"><div class="form-group">
             <label class="form-label">${iconDumbbell()} ${t.generate.equipmentLabel}</label>
             <p class="form-hint">${t.generate.equipmentHint}</p>
             <div class="equipment-grid" data-field="equipment">
@@ -185,15 +192,16 @@ export function initGenerate() {
   const form = document.getElementById('generate-form');
   if (!form) return;
 
-  const state = { age: null, equipment: [], focus: [], duration: 45 };
+  const state = { age: null, gender: null, equipment: [], focus: [], duration: 45 };
 
-  form.querySelectorAll('.pill-group[data-field="age"] .pill, .pill-group[data-field="duration"] .pill').forEach(pill => {
+  form.querySelectorAll('.pill-group[data-field="age"] .pill, .pill-group[data-field="gender"] .pill, .pill-group[data-field="duration"] .pill').forEach(pill => {
     pill.addEventListener('click', () => {
       const group = pill.closest('[data-field]');
       const field = group.dataset.field;
       group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
       if (field === 'age') state.age = pill.dataset.value;
+      if (field === 'gender') state.gender = pill.dataset.value;
       if (field === 'duration') {
         state.duration = Number(pill.dataset.value);
         document.getElementById('duration-value').textContent = state.duration;
@@ -232,7 +240,7 @@ export function initGenerate() {
 
     showLoading();
     try {
-      const lesson = await generateLesson({ targetAge: state.age, focusAreas: state.focus, durationMinutes: state.duration, equipment: state.equipment });
+      const lesson = await generateLesson({ targetAge: state.age, gender: state.gender, focusAreas: state.focus, durationMinutes: state.duration, equipment: state.equipment });
       hideLoading();
       showToast(t.toast.success, 'success');
       window.location.hash = `#/lesson/${lesson.id}`;

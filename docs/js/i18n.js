@@ -57,6 +57,12 @@ export const t = {
     equipmentHint: 'ניתן לבחור מספר מכשירים',
     focusLabel: 'תחומי מיקוד',
     focusHint: 'ניתן לבחור מספר תחומים',
+    genderLabel: 'קהל יעד',
+    genderOptions: [
+      { value: 'male', label: 'גברים' },
+      { value: 'female', label: 'נשים' },
+      { value: 'mixed', label: 'מעורב' },
+    ],
     durationLabel: 'משך האימון',
     durationUnit: 'דקות',
     submit: 'צור תוכנית',
