@@ -1100,3 +1100,195 @@ a.lesson-card:hover {
     opacity: 1;
   }
 }
+
+/* ========================
+   LOGIN PAGE
+   ======================== */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-hero);
+  padding: var(--space-4);
+}
+
+.login-card {
+  background: var(--color-surface-container-lowest);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: var(--shadow-xl);
+}
+
+.login-card__logo {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-lg);
+  object-fit: contain;
+  margin: 0 auto var(--space-4);
+  display: block;
+}
+
+.login-card__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.login-card__subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+  line-height: var(--line-height-relaxed);
+}
+
+.locked-icon {
+  margin-bottom: var(--space-4);
+}
+
+/* Google Sign-In Button */
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-family: var(--font-family);
+}
+
+.google-btn:hover {
+  background: var(--color-surface-container-low);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.google-btn:active {
+  transform: translateY(0);
+}
+
+.google-btn__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ========================
+   GREETING
+   ======================== */
+
+.greeting {
+  padding: var(--space-2) 0 var(--space-1);
+}
+
+.greeting__text {
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .greeting__text {
+    font-size: var(--text-2xl);
+  }
+}
+
+/* ========================
+   ADMIN USER MANAGEMENT
+   ======================== */
+
+.admin-users {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.admin-user-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.admin-user-card:hover {
+  background: var(--color-surface-container-low);
+}
+
+.admin-user-card--locked {
+  background: var(--color-error-light);
+  border-color: var(--color-error);
+}
+
+.admin-user-card--locked:hover {
+  background: var(--color-error-light);
+}
+
+.admin-user-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border-light);
+}
+
+.admin-user-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-user-card__name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.admin-user-card__email {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.admin-user-card__stats {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-1);
+}
+
+.admin-user-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .admin-user-card {
+    flex-wrap: wrap;
+  }
+  .admin-user-card__actions {
+    width: 100%;
+    flex-direction: row;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border-light);
+  }
+}

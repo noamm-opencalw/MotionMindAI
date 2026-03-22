@@ -1,5 +1,6 @@
 import { t } from './i18n.js';
 import {
+  iconTimeSaving, iconCertificate, iconBrain,
   iconArrowRight, iconChevronLeft, iconClock, iconUsers, iconExercise,
   iconInstructor, emptyStateIllustration, iconTarget,
   iconKey, iconCheck, iconTrash, iconAlert, iconEdit, iconDumbbell,
@@ -13,24 +14,91 @@ import {
   generateLesson, getAllLessons, getLessonById, hasApiKey, getApiKey, setApiKey,
   testConnection, regenerateExercise, updateExerciseNote, reorderExercises,
   deleteLesson, generateProgram, getAllPrograms, getProgramById, deleteProgram,
+  getAllUsers, toggleUserLock, deleteUser, getUserLessonsCount, getUserProgramsCount,
 } from './api.js';
+import { signInWithGoogle, isAdmin, getFirstName, getTimeGreeting, getProfile } from './auth.js';
+
+// =============================
+// LOGIN VIEW
+// =============================
+export function renderLogin() {
+  return `
+    <div class="login-page">
+      <div class="login-card">
+        <img src="MotionMindAI_nobg.png" alt="${t.appName}" class="login-card__logo">
+        <h1 class="login-card__title">${t.appName}</h1>
+        <p class="login-card__subtitle">${t.auth.loginSubtitle}</p>
+        <button type="button" class="google-btn" id="google-signin-btn">
+          <svg class="google-btn__icon" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          ${t.auth.loginWithGoogle}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+export function initLogin() {
+  document.getElementById('google-signin-btn')?.addEventListener('click', async () => {
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      console.error('Login error:', err);
+      showToast('שגיאה בהתחברות. נסה שנית.', 'error');
+    }
+  });
+}
+
+// =============================
+// LOCKED VIEW
+// =============================
+export function renderLocked() {
+  return `
+    <div class="login-page">
+      <div class="login-card">
+        <div class="locked-icon">
+          <span class="material-symbols-outlined" style="font-size:64px;color:var(--color-error)">lock</span>
+        </div>
+        <h1 class="login-card__title">${t.auth.lockedTitle}</h1>
+        <p class="login-card__subtitle">${t.auth.lockedDesc}</p>
+        <button type="button" class="btn btn--secondary" id="locked-logout-btn">
+          <span class="material-symbols-outlined" style="font-size:18px">logout</span>
+          ${t.auth.logout}
+        </button>
+      </div>
+    </div>
+  `;
+}
 
 // =============================
 // HOME VIEW
 // =============================
 export function renderHome() {
   const hasKey = hasApiKey();
+  const firstName = getFirstName();
+  const greeting = getTimeGreeting(firstName);
+  const admin = isAdmin();
 
   return `
     <div class="page page-enter">
+      <div class="container">
+        <div class="greeting">
+          <h2 class="greeting__text">${greeting}</h2>
+        </div>
+      </div>
+
       ${!hasKey ? `
         <div class="container" style="margin-bottom:0">
-          <a href="#/settings" class="api-banner">
+          <a href="${admin ? '#/settings' : '#/'}" class="api-banner">
             <div class="api-banner__icon">${iconAlert()}</div>
             <div class="api-banner__text">
-              <strong>${t.errors.noApiKey}</strong>
+              <strong>${admin ? t.errors.noApiKey : t.errors.noApiKeyUser}</strong>
             </div>
-            <div class="api-banner__arrow">${iconArrowRight()}</div>
+            ${admin ? `<div class="api-banner__arrow">${iconArrowRight()}</div>` : ''}
           </a>
         </div>
       ` : ''}
@@ -50,7 +118,7 @@ export function renderHome() {
         </div>
         <div class="hero__content">
           <div class="hero__logo">
-            <img src="MotionMindAI.png" alt="${t.appName}" class="hero__logo-img" />
+            <img src="MotionMindAI_nobg.png" alt="${t.appName}" class="hero__logo-img" />
           </div>
           <h1 class="hero__title">${t.hero.title}</h1>
           <p class="hero__subtitle">${t.hero.subtitle}</p>
@@ -67,7 +135,26 @@ export function renderHome() {
         </div>
       </section>
 
+      <!-- Features -->
       <div class="container">
+        <div class="features stagger-enter">
+          <div class="feature-card">
+            <div class="feature-card__icon feature-card__icon--time">${iconTimeSaving()}</div>
+            <div class="feature-card__title">${t.features.time.title}</div>
+            <div class="feature-card__desc">${t.features.time.desc}</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card__icon feature-card__icon--quality">${iconCertificate()}</div>
+            <div class="feature-card__title">${t.features.quality.title}</div>
+            <div class="feature-card__desc">${t.features.quality.desc}</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card__icon feature-card__icon--ai">${iconBrain()}</div>
+            <div class="feature-card__title">${t.features.ai.title}</div>
+            <div class="feature-card__desc">${t.features.ai.desc}</div>
+          </div>
+        </div>
+
         <section class="how-it-works">
           <h2 class="section-title">${t.howItWorks.title}</h2>
           <div class="steps">
@@ -90,6 +177,7 @@ export function renderHome() {
 // =============================
 export function renderGenerate() {
   const hasKey = hasApiKey();
+  const admin = isAdmin();
 
   return `
     <div class="page page-enter">
@@ -98,10 +186,10 @@ export function renderGenerate() {
         <p class="section-subtitle" style="margin-bottom:var(--space-6)">${t.generate.subtitle}</p>
 
         ${!hasKey ? `
-          <a href="#/settings" class="api-banner" style="margin-bottom:var(--space-4)">
+          <a href="${admin ? '#/settings' : '#/'}" class="api-banner" style="margin-bottom:var(--space-4)">
             <div class="api-banner__icon">${iconAlert()}</div>
-            <div class="api-banner__text"><strong>${t.errors.noApiKey}</strong></div>
-            <div class="api-banner__arrow">${iconArrowRight()}</div>
+            <div class="api-banner__text"><strong>${admin ? t.errors.noApiKey : t.errors.noApiKeyUser}</strong></div>
+            ${admin ? `<div class="api-banner__arrow">${iconArrowRight()}</div>` : ''}
           </a>
         ` : ''}
 
@@ -216,7 +304,7 @@ export function initGenerate() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!state.age || state.focus.length === 0) { showToast(t.errors.fillAll, 'error'); return; }
-    if (!hasApiKey()) { showToast(t.errors.noApiKey, 'error'); setTimeout(() => { window.location.hash = '#/settings'; }, 1500); return; }
+    if (!hasApiKey()) { showToast(isAdmin() ? t.errors.noApiKey : t.errors.noApiKeyUser, 'error'); return; }
 
     showLoading();
     try {
@@ -226,7 +314,7 @@ export function initGenerate() {
       window.location.hash = `#/lesson/${lesson.id}`;
     } catch (err) {
       hideLoading();
-      if (err.message === 'NO_API_KEY') { showToast(t.errors.noApiKey, 'error'); setTimeout(() => { window.location.hash = '#/settings'; }, 1500); }
+      if (err.message === 'NO_API_KEY') { showToast(isAdmin() ? t.errors.noApiKey : t.errors.noApiKeyUser, 'error'); }
       else if (err.message === 'INVALID_API_KEY') { showToast(t.errors.invalidApiKey, 'error'); }
       else { showToast(t.errors.generateFailed, 'error'); }
       console.error('Generate error:', err);
@@ -395,13 +483,14 @@ function bindEditActions(lessonId, renderDetail) {
 // =============================
 export function renderProgramCreate() {
   const hasKey = hasApiKey();
+  const admin = isAdmin();
 
   return `
     <div class="page page-enter"><div class="container container--narrow">
       <h1 class="section-title">${t.program.title}</h1>
       <p class="section-subtitle" style="margin-bottom:var(--space-6)">${t.program.subtitle}</p>
 
-      ${!hasKey ? `<a href="#/settings" class="api-banner" style="margin-bottom:var(--space-4)"><div class="api-banner__icon">${iconAlert()}</div><div class="api-banner__text"><strong>${t.errors.noApiKey}</strong></div><div class="api-banner__arrow">${iconArrowRight()}</div></a>` : ''}
+      ${!hasKey ? `<a href="${admin ? '#/settings' : '#/'}" class="api-banner" style="margin-bottom:var(--space-4)"><div class="api-banner__icon">${iconAlert()}</div><div class="api-banner__text"><strong>${admin ? t.errors.noApiKey : t.errors.noApiKeyUser}</strong></div>${admin ? `<div class="api-banner__arrow">${iconArrowRight()}</div>` : ''}</a>` : ''}
 
       <form id="program-form" class="generate-form">
         <!-- Goal -->
@@ -529,7 +618,7 @@ export function initProgramCreate() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!state.goal || !state.timeframe || !state.gender || !state.fitnessLevel) { showToast(t.errors.programFillAll, 'error'); return; }
-    if (!hasApiKey()) { showToast(t.errors.noApiKey, 'error'); setTimeout(() => { window.location.hash = '#/settings'; }, 1500); return; }
+    if (!hasApiKey()) { showToast(isAdmin() ? t.errors.noApiKey : t.errors.noApiKeyUser, 'error'); return; }
 
     showLoading();
     try {
@@ -545,7 +634,7 @@ export function initProgramCreate() {
       window.location.hash = `#/program/${program.id}`;
     } catch (err) {
       hideLoading();
-      if (err.message === 'NO_API_KEY') { showToast(t.errors.noApiKey, 'error'); }
+      if (err.message === 'NO_API_KEY') { showToast(isAdmin() ? t.errors.noApiKey : t.errors.noApiKeyUser, 'error'); }
       else if (err.message === 'INVALID_API_KEY') { showToast(t.errors.invalidApiKey, 'error'); }
       else { showToast(t.errors.programFailed, 'error'); }
       console.error('Program error:', err);
@@ -563,50 +652,55 @@ export function renderPrograms() {
   </div></div>`;
 }
 
-export function initPrograms() {
+export async function initPrograms() {
   const content = document.getElementById('programs-content');
   if (!content) return;
 
-  const programs = getAllPrograms();
+  try {
+    const programs = await getAllPrograms();
 
-  if (programs.length === 0) {
-    content.innerHTML = `<div class="empty-state">${emptyStateIllustration()}<div class="empty-state__title">${t.program.empty.title}</div><div class="empty-state__desc">${t.program.empty.desc}</div><a href="#/program" class="btn btn--primary">${t.program.empty.cta}</a></div>`;
-    return;
-  }
+    if (programs.length === 0) {
+      content.innerHTML = `<div class="empty-state">${emptyStateIllustration()}<div class="empty-state__title">${t.program.empty.title}</div><div class="empty-state__desc">${t.program.empty.desc}</div><a href="#/program" class="btn btn--primary">${t.program.empty.cta}</a></div>`;
+      return;
+    }
 
-  content.innerHTML = `<div class="lessons-list stagger-enter">${programs.map(p => {
-    const goalLabel = t.program.goals.find(g => g.value === p.params?.goal)?.label || p.params?.goal || '';
-    const timeLabel = t.program.timeframes.find(tf => tf.value === p.params?.timeframe)?.label || '';
-    return `
-      <div class="card card--interactive card--accent-start lesson-card" style="border-inline-start-color:var(--color-secondary);position:relative">
-        <a href="#/program/${p.id}" class="card__body lesson-card" style="text-decoration:none;color:inherit">
-          <div class="lesson-card__title">${p.title || 'תוכנית אימונים'}</div>
-          <div class="lesson-card__meta">
-            <span class="badge badge--primary">${goalLabel}</span>
-            <span class="badge badge--flexibility">${timeLabel}</span>
-          </div>
-          <div class="lesson-card__footer">
-            <div class="lesson-card__stats">
-              <span class="meta-item">${iconClock()}<span>${p.totalWeeks} ${t.program.weeks}</span></span>
-              <span class="meta-item">${iconExercise()}<span>${p.daysPerWeek} ${t.program.sessionsPerWeek}</span></span>
+    content.innerHTML = `<div class="lessons-list stagger-enter">${programs.map(p => {
+      const goalLabel = t.program.goals.find(g => g.value === p.params?.goal)?.label || p.params?.goal || '';
+      const timeLabel = t.program.timeframes.find(tf => tf.value === p.params?.timeframe)?.label || '';
+      return `
+        <div class="card card--interactive card--accent-start lesson-card" style="border-inline-start-color:var(--color-secondary);position:relative">
+          <a href="#/program/${p.id}" class="card__body lesson-card" style="text-decoration:none;color:inherit">
+            <div class="lesson-card__title">${p.title || 'תוכנית אימונים'}</div>
+            <div class="lesson-card__meta">
+              <span class="badge badge--primary">${goalLabel}</span>
+              <span class="badge badge--flexibility">${timeLabel}</span>
             </div>
-          </div>
-        </a>
-        <button type="button" class="lesson-delete-btn program-delete-btn" data-program-id="${p.id}" title="מחק">${iconTrash()}</button>
-      </div>
-    `;
-  }).join('')}</div>`;
+            <div class="lesson-card__footer">
+              <div class="lesson-card__stats">
+                <span class="meta-item">${iconClock()}<span>${p.totalWeeks} ${t.program.weeks}</span></span>
+                <span class="meta-item">${iconExercise()}<span>${p.daysPerWeek} ${t.program.sessionsPerWeek}</span></span>
+              </div>
+            </div>
+          </a>
+          <button type="button" class="lesson-delete-btn program-delete-btn" data-program-id="${p.id}" title="מחק">${iconTrash()}</button>
+        </div>
+      `;
+    }).join('')}</div>`;
 
-  content.querySelectorAll('.program-delete-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!confirm(t.program.deleteConfirm)) return;
-      deleteProgram(btn.dataset.programId);
-      showToast(t.program.deleted, 'success');
-      initPrograms();
+    content.querySelectorAll('.program-delete-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!confirm(t.program.deleteConfirm)) return;
+        await deleteProgram(btn.dataset.programId);
+        showToast(t.program.deleted, 'success');
+        await initPrograms();
+      });
     });
-  });
+  } catch (err) {
+    content.innerHTML = `<div class="empty-state"><div class="empty-state__title">${t.errors.loadFailed}</div></div>`;
+    console.error('Load programs error:', err);
+  }
 }
 
 // =============================
@@ -619,11 +713,11 @@ export function renderProgramDetail() {
   </div></div>`;
 }
 
-export function initProgramDetail(id) {
+export async function initProgramDetail(id) {
   const content = document.getElementById('program-detail-content');
   if (!content) return;
 
-  const program = getProgramById(id);
+  const program = await getProgramById(id);
   if (!program) {
     content.innerHTML = `<div class="empty-state"><div class="empty-state__title">${t.detail.notFound}</div><a href="#/programs" class="btn btn--secondary">${t.program.backToPrograms}</a></div>`;
     return;
@@ -742,7 +836,7 @@ export function initProgramDetail(id) {
 }
 
 // =============================
-// SETTINGS VIEW
+// SETTINGS VIEW (Admin Only)
 // =============================
 export function renderSettings() {
   const currentKey = getApiKey();
@@ -751,6 +845,8 @@ export function renderSettings() {
   return `
     <div class="page page-enter"><div class="container container--narrow">
       <h1 class="section-title">${t.settings.title}</h1>
+
+      <!-- API Key -->
       <div class="card" style="margin-bottom:var(--space-4)"><div class="card__body">
         <div id="connection-status" class="settings-status ${isConnected ? 'settings-status--connected' : 'settings-status--disconnected'}">
           <div class="settings-status__dot"></div>
@@ -770,27 +866,41 @@ export function renderSettings() {
         </div>
         <div id="test-result" style="margin-top:var(--space-3);display:none"></div>
       </div></div>
-      <div class="card"><div class="card__body"><div class="form-group">
-        <label class="form-label">${t.settings.dataTitle}</label>
-        <button type="button" id="clear-data-btn" class="btn btn--ghost" style="color:var(--color-error)">${iconTrash()} ${t.settings.clearData}</button>
-      </div></div></div>
+
+      <!-- Admin: User Management -->
+      <div class="card"><div class="card__body">
+        <h2 class="section-title" style="margin-bottom:var(--space-4)">${t.admin.usersTitle}</h2>
+        <div id="admin-users-content">
+          <div class="skeleton skeleton--text"></div>
+          <div class="skeleton skeleton--text-sm"></div>
+        </div>
+      </div></div>
     </div></div>
   `;
 }
 
-export function initSettings() {
+export async function initSettings() {
+  // API Key management
   const saveBtn = document.getElementById('save-key-btn');
   const testBtn = document.getElementById('test-key-btn');
   const clearBtn = document.getElementById('clear-key-btn');
-  const clearDataBtn = document.getElementById('clear-data-btn');
   const input = document.getElementById('api-key-input');
   const testResult = document.getElementById('test-result');
   const statusEl = document.getElementById('connection-status');
 
   if (saveBtn && input) {
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
       const key = input.value.trim();
-      if (key) { setApiKey(key); showToast(t.settings.saved, 'success'); if (statusEl) { statusEl.className = 'settings-status settings-status--connected'; statusEl.querySelector('span').textContent = t.settings.status.connected; } }
+      if (key) {
+        try {
+          await setApiKey(key);
+          showToast(t.settings.saved, 'success');
+          if (statusEl) { statusEl.className = 'settings-status settings-status--connected'; statusEl.querySelector('span').textContent = t.settings.status.connected; }
+        } catch (err) {
+          showToast('שגיאה בשמירת המפתח', 'error');
+          console.error('Save key error:', err);
+        }
+      }
     });
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveBtn.click(); } });
   }
@@ -798,7 +908,9 @@ export function initSettings() {
   if (testBtn && testResult) {
     testBtn.addEventListener('click', async () => {
       const key = input.value.trim();
-      if (key) setApiKey(key);
+      if (key) {
+        try { await setApiKey(key); } catch (err) { /* ignore */ }
+      }
       testResult.style.display = 'block';
       testResult.innerHTML = '<div style="color:var(--color-text-secondary);font-size:var(--text-sm)">בודק חיבור...</div>';
       testBtn.disabled = true;
@@ -809,7 +921,104 @@ export function initSettings() {
     });
   }
 
-  if (clearBtn) { clearBtn.addEventListener('click', () => { setApiKey(''); if (input) input.value = ''; showToast(t.settings.cleared, 'success'); if (statusEl) { statusEl.className = 'settings-status settings-status--disconnected'; statusEl.querySelector('span').textContent = t.settings.status.notConnected; } }); }
+  if (clearBtn) {
+    clearBtn.addEventListener('click', async () => {
+      try {
+        await setApiKey('');
+        if (input) input.value = '';
+        showToast(t.settings.cleared, 'success');
+        if (statusEl) { statusEl.className = 'settings-status settings-status--disconnected'; statusEl.querySelector('span').textContent = t.settings.status.notConnected; }
+      } catch (err) {
+        console.error('Clear key error:', err);
+      }
+    });
+  }
 
-  if (clearDataBtn) { clearDataBtn.addEventListener('click', () => { if (confirm(t.settings.clearConfirm)) { localStorage.removeItem('motionmind_lessons'); localStorage.removeItem('motionmind_programs'); showToast(t.settings.dataCleared, 'success'); } }); }
+  // Admin: Load users
+  await loadAdminUsers();
+}
+
+async function loadAdminUsers() {
+  const container = document.getElementById('admin-users-content');
+  if (!container) return;
+
+  try {
+    const users = await getAllUsers();
+    const currentProfile = getProfile();
+
+    if (users.length === 0) {
+      container.innerHTML = `<p style="color:var(--color-text-secondary);font-size:var(--text-sm)">${t.admin.noUsers}</p>`;
+      return;
+    }
+
+    // Get counts for each user
+    const usersWithCounts = await Promise.all(users.map(async (user) => {
+      const lessonsCount = await getUserLessonsCount(user.id);
+      const programsCount = await getUserProgramsCount(user.id);
+      return { ...user, lessonsCount, programsCount };
+    }));
+
+    container.innerHTML = `
+      <div class="admin-users">
+        ${usersWithCounts.map(user => `
+          <div class="admin-user-card ${user.is_locked ? 'admin-user-card--locked' : ''}">
+            <img src="${user.avatar_url || 'MotionMindAI_nobg.png'}" alt="${user.full_name}" class="admin-user-card__avatar" referrerpolicy="no-referrer">
+            <div class="admin-user-card__info">
+              <div class="admin-user-card__name">
+                ${user.full_name || user.email}
+                ${user.role === 'admin' ? `<span class="badge badge--primary" style="font-size:var(--text-xs);margin-inline-start:var(--space-1)">${t.admin.roleAdmin}</span>` : ''}
+                ${user.is_locked ? `<span class="badge badge--cooldown" style="font-size:var(--text-xs);margin-inline-start:var(--space-1)">${t.admin.statusLocked}</span>` : ''}
+              </div>
+              <div class="admin-user-card__email">${user.email}</div>
+              <div class="admin-user-card__stats">
+                ${user.lessonsCount} ${t.admin.userLessons} · ${user.programsCount} ${t.admin.userPrograms}
+              </div>
+            </div>
+            ${user.id !== currentProfile?.id ? `
+              <div class="admin-user-card__actions">
+                <button type="button" class="btn btn--ghost btn--sm admin-lock-btn" data-user-id="${user.id}" data-locked="${user.is_locked}">
+                  <span class="material-symbols-outlined" style="font-size:16px">${user.is_locked ? 'lock_open' : 'lock'}</span>
+                  ${user.is_locked ? t.admin.unlockUser : t.admin.lockUser}
+                </button>
+                <button type="button" class="btn btn--ghost btn--sm admin-delete-btn" data-user-id="${user.id}" style="color:var(--color-error)">
+                  ${iconTrash()} ${t.admin.deleteUser}
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // Bind admin actions
+    container.querySelectorAll('.admin-lock-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const currentlyLocked = btn.dataset.locked === 'true';
+        try {
+          await toggleUserLock(userId, !currentlyLocked);
+          showToast(currentlyLocked ? t.admin.userUnlocked : t.admin.userLocked, 'success');
+          await loadAdminUsers();
+        } catch (err) {
+          console.error('Lock/unlock error:', err);
+        }
+      });
+    });
+
+    container.querySelectorAll('.admin-delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm(t.admin.deleteUserConfirm)) return;
+        try {
+          await deleteUser(btn.dataset.userId);
+          showToast(t.admin.userDeleted, 'success');
+          await loadAdminUsers();
+        } catch (err) {
+          console.error('Delete user error:', err);
+        }
+      });
+    });
+  } catch (err) {
+    container.innerHTML = `<p style="color:var(--color-error);font-size:var(--text-sm)">שגיאה בטעינת משתמשים</p>`;
+    console.error('Load users error:', err);
+  }
 }
