@@ -1,5 +1,7 @@
 import { t } from './i18n.js';
-import { logoIcon, iconHome, iconSparkle, iconList, iconSettings, iconTarget, iconNotifications } from './icons.js';
+import { iconHome, iconSparkle, iconList, iconSettings, iconTarget, iconNotifications } from './icons.js';
+import { initAuth, onAuthStateChange, signOut, isLoggedIn, isAdmin, isLocked, getProfile, getFirstName, getTimeGreeting } from './auth.js';
+import { loadApiKey } from './api.js';
 import {
   renderHome,
   renderGenerate, initGenerate,
@@ -9,6 +11,8 @@ import {
   renderPrograms, initPrograms,
   renderProgramDetail, initProgramDetail,
   renderSettings, initSettings,
+  renderLogin, initLogin,
+  renderLocked,
 } from './views.js';
 
 // =============================
@@ -35,8 +39,16 @@ function matchRoute(hash) {
 }
 
 async function navigate() {
+  if (!isLoggedIn()) return;
+
   const { view, params } = matchRoute(window.location.hash);
   const app = document.getElementById('app');
+
+  // Settings is admin-only
+  if (view === 'settings' && !isAdmin()) {
+    window.location.hash = '#/';
+    return;
+  }
 
   switch (view) {
     case 'home':
@@ -48,11 +60,11 @@ async function navigate() {
       break;
     case 'lessons':
       app.innerHTML = renderLessons();
-      initLessons();
+      await initLessons();
       break;
     case 'detail':
       app.innerHTML = renderLessonDetail();
-      initLessonDetail(params[0]);
+      await initLessonDetail(params[0]);
       break;
     case 'programCreate':
       app.innerHTML = renderProgramCreate();
@@ -60,15 +72,15 @@ async function navigate() {
       break;
     case 'programs':
       app.innerHTML = renderPrograms();
-      initPrograms();
+      await initPrograms();
       break;
     case 'programDetail':
       app.innerHTML = renderProgramDetail();
-      initProgramDetail(params[0]);
+      await initProgramDetail(params[0]);
       break;
     case 'settings':
       app.innerHTML = renderSettings();
-      initSettings();
+      await initSettings();
       break;
   }
 
@@ -89,13 +101,26 @@ function updateNav(activeView) {
 // APP SHELL
 // =============================
 function createAppShell() {
+  const profile = getProfile();
   const header = document.querySelector('.header__inner');
   if (header) {
     header.innerHTML = `
       <div class="header__actions">
         <span class="header__notification">${iconNotifications()}</span>
-        <div class="header__avatar">
-          <img src="MotionMindAI_small.png" alt="${t.appName}">
+        <div class="header__user-menu">
+          <button class="header__avatar-btn" id="user-menu-btn" type="button">
+            <img src="${profile?.avatar_url || 'MotionMindAI_nobg.png'}" alt="${profile?.full_name || t.appName}" referrerpolicy="no-referrer">
+          </button>
+          <div class="header__dropdown" id="user-dropdown" style="display:none">
+            <div class="header__dropdown-info">
+              <div class="header__dropdown-name">${profile?.full_name || ''}</div>
+              <div class="header__dropdown-email">${profile?.email || ''}</div>
+            </div>
+            <button type="button" class="header__dropdown-item header__dropdown-item--danger" id="logout-btn">
+              <span class="material-symbols-outlined" style="font-size:18px">logout</span>
+              ${t.auth.logout}
+            </button>
+          </div>
         </div>
       </div>
       <a href="#/" class="header__logo" style="text-decoration:none">
@@ -106,12 +131,26 @@ function createAppShell() {
         <a href="#/generate" class="header__nav-item" data-view="generate">${t.nav.generate}</a>
         <a href="#/program" class="header__nav-item" data-view="programCreate">${t.nav.program}</a>
         <a href="#/lessons" class="header__nav-item" data-view="lessons">${t.nav.lessons}</a>
-        <a href="#/settings" class="header__nav-item" data-view="settings">${t.settings.title}</a>
+        ${isAdmin() ? `<a href="#/settings" class="header__nav-item" data-view="settings">${t.settings.title}</a>` : ''}
       </nav>
       <div class="header__back">
         <span class="material-symbols-outlined">arrow_forward</span>
       </div>
     `;
+
+    // User menu dropdown toggle
+    const menuBtn = document.getElementById('user-menu-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    if (menuBtn && dropdown) {
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      });
+      document.addEventListener('click', () => { dropdown.style.display = 'none'; });
+    }
+
+    // Logout button
+    document.getElementById('logout-btn')?.addEventListener('click', () => signOut());
 
     const checkDesktopNav = () => {
       const nav = header.querySelector('.header__nav');
@@ -140,21 +179,73 @@ function createAppShell() {
         <span class="material-symbols-outlined">layers</span>
         <span>${t.nav.lessons}</span>
       </a>
-      <a href="#/settings" class="bottom-nav__item" data-view="settings">
-        <span class="material-symbols-outlined">settings</span>
-        <span>${t.settings.title}</span>
-      </a>
+      ${isAdmin() ? `
+        <a href="#/settings" class="bottom-nav__item" data-view="settings">
+          <span class="material-symbols-outlined">settings</span>
+          <span>${t.settings.title}</span>
+        </a>
+      ` : ''}
     `;
   }
 }
 
 // =============================
-// INIT
+// SHOW LOGIN / LOCKED PAGES
 // =============================
-function init() {
+function showLoginPage() {
+  document.querySelector('.header').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'none';
+  const app = document.getElementById('app');
+  app.innerHTML = renderLogin();
+  initLogin();
+}
+
+function showLockedPage() {
+  document.querySelector('.header').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'none';
+  const app = document.getElementById('app');
+  app.innerHTML = renderLocked();
+  document.getElementById('locked-logout-btn')?.addEventListener('click', () => signOut());
+}
+
+function showApp() {
+  document.querySelector('.header').style.display = '';
+  document.getElementById('bottom-nav').style.display = '';
   createAppShell();
   navigate();
   window.addEventListener('hashchange', navigate);
+}
+
+// =============================
+// INIT
+// =============================
+async function init() {
+  const user = await initAuth();
+
+  if (!user) {
+    showLoginPage();
+    onAuthStateChange(async (event) => {
+      if (event === 'SIGNED_IN') {
+        await loadApiKey();
+        if (isLocked()) {
+          showLockedPage();
+        } else {
+          showApp();
+        }
+      }
+    });
+    return;
+  }
+
+  // User is logged in
+  await loadApiKey();
+
+  if (isLocked()) {
+    showLockedPage();
+    return;
+  }
+
+  showApp();
 }
 
 document.addEventListener('DOMContentLoaded', init);

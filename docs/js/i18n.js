@@ -9,6 +9,15 @@ export const t = {
     program: 'תכנון',
   },
 
+  auth: {
+    loginTitle: 'ברוכים הבאים',
+    loginSubtitle: 'התחבר כדי ליצור תוכניות אימון מותאמות אישית',
+    loginWithGoogle: 'התחבר עם Google',
+    logout: 'התנתק',
+    lockedTitle: 'החשבון שלך נעול',
+    lockedDesc: 'אנא פנה למנהל המערכת לפתיחת החשבון.',
+  },
+
   hero: {
     title: 'תוכניות אימון מותאמות אישית בלחיצת כפתור',
     subtitle: 'בינה מלאכותית שמבינה תנועה — יוצרת תוכניות פילאטיס וחינוך גופני מקצועיות, עם תרגילים, זמנים והנחיות מאמן.',
@@ -252,10 +261,34 @@ export const t = {
     clearConfirm: 'האם למחוק את כל התוכניות השמורות?',
   },
 
+  admin: {
+    usersTitle: 'ניהול משתמשים',
+    userName: 'שם',
+    userEmail: 'אימייל',
+    userRole: 'תפקיד',
+    userStatus: 'סטטוס',
+    userLessons: 'שיעורים',
+    userPrograms: 'תוכניות',
+    userActions: 'פעולות',
+    roleAdmin: 'מנהל',
+    roleUser: 'משתמש',
+    statusActive: 'פעיל',
+    statusLocked: 'נעול',
+    lockUser: 'נעל',
+    unlockUser: 'בטל נעילה',
+    deleteUser: 'מחק',
+    deleteUserConfirm: 'האם למחוק את המשתמש וכל הנתונים שלו?',
+    userDeleted: 'המשתמש נמחק',
+    userLocked: 'המשתמש ננעל',
+    userUnlocked: 'המשתמש שוחרר',
+    noUsers: 'אין משתמשים רשומים',
+  },
+
   errors: {
     generateFailed: 'שגיאה ביצירת התוכנית. נסה שנית.',
     invalidApiKey: 'מפתח API לא תקין. בדוק את המפתח בהגדרות.',
     noApiKey: 'יש להגדיר מפתח Gemini API בהגדרות לפני יצירת תוכנית.',
+    noApiKeyUser: 'מפתח API לא הוגדר. יש לפנות למנהל המערכת.',
     loadFailed: 'שגיאה בטעינת הנתונים. נסה שנית.',
     fillAll: 'יש לבחור קבוצת גיל ותחום מיקוד אחד לפחות',
     regenerateFailed: 'שגיאה ביצירת התרגיל מחדש. נסה שנית.',
