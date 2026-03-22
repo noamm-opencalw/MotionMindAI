@@ -84,12 +84,6 @@ export function renderHome() {
 
   return `
     <div class="page page-enter">
-      <div class="container">
-        <div class="greeting">
-          <h2 class="greeting__text">${greeting}</h2>
-        </div>
-      </div>
-
       ${!hasKey ? `
         <div class="container" style="margin-bottom:0">
           <a href="${admin ? '#/settings' : '#/'}" class="api-banner">
@@ -116,8 +110,11 @@ export function renderHome() {
           `).join('')}
         </div>
         <div class="hero__content">
+          <div class="greeting" style="color:#fff">
+            <h2 class="greeting__text">${greeting}</h2>
+          </div>
           <div class="hero__logo">
-            <img src="MotionMindAI_large.png" alt="${t.appName}" class="hero__logo-img" />
+            <img src="MotionMindAI_large_transparent.png" alt="${t.appName}" class="hero__logo-img" />
           </div>
           <h1 class="hero__title">${t.hero.title}</h1>
           <p class="hero__subtitle">${t.hero.subtitle}</p>
