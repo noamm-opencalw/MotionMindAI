@@ -45,16 +45,16 @@ export function iconPosture() { return ms('accessibility_new'); }
 
 // Equipment icons
 export function iconBodyweight() { return ms('accessibility_new'); }
-export function iconMat() { return ms('yoga'); }
+export function iconMat() { return ms('self_improvement'); }
 export function iconBall() { return ms('sports_tennis'); }
 export function iconBand() { return ms('cable'); }
 export function iconRoller() { return ms('view_column'); }
 export function iconWeights() { return ms('fitness_center'); }
 export function iconRing() { return ms('circle'); }
 export function iconChair() { return ms('chair'); }
-export function iconWall() { return ms('wall'); }
+export function iconWall() { return ms('grid_on'); }
 export function iconHoop() { return ms('radio_button_unchecked'); }
-export function iconRope() { return ms('jump_rope'); }
+export function iconRope() { return ms('lasso'); }
 export function iconBench() { return ms('table_restaurant'); }
 
 // Utility icons
@@ -127,7 +127,7 @@ export function emptyStateIllustration() {
 
 // Logo icon - PNG image
 export function logoIcon() {
-  return `<img src="MotionMindAI_small.png" alt="פאר טוסיק" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">`;
+  return `<img src="MotionMindAI_small_transparent.png" alt="פאר טוסיק" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">`;
 }
 
 // Category icon mapper

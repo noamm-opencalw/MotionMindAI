@@ -24,7 +24,7 @@ export function renderLogin() {
   return `
     <div class="login-page">
       <div class="login-card">
-        <img src="MotionMindAI_small.png" alt="${t.appName}" class="login-card__logo">
+        <img src="MotionMindAI_small_transparent.png" alt="${t.appName}" class="login-card__logo">
         <h1 class="login-card__title">${t.appName}</h1>
         <p class="login-card__subtitle">${t.auth.loginSubtitle}</p>
         <button type="button" class="google-btn" id="google-signin-btn">
@@ -110,11 +110,11 @@ export function renderHome() {
           `).join('')}
         </div>
         <div class="hero__content">
-          <div class="greeting" style="color:#fff">
-            <h2 class="greeting__text">${greeting}</h2>
-          </div>
           <div class="hero__logo">
             <img src="MotionMindAI_large_transparent.png" alt="${t.appName}" class="hero__logo-img" />
+          </div>
+          <div class="greeting">
+            <h2 class="greeting__text" style="color:#fff">${greeting}</h2>
           </div>
           <h1 class="hero__title">${t.hero.title}</h1>
           <p class="hero__subtitle">${t.hero.subtitle}</p>
