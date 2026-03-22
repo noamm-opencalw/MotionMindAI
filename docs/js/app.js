@@ -109,7 +109,7 @@ function createAppShell() {
         <span class="header__notification">${iconNotifications()}</span>
         <div class="header__user-menu">
           <button class="header__avatar-btn" id="user-menu-btn" type="button">
-            <img src="${profile?.avatar_url || 'MotionMindAI_nobg.png'}" alt="${profile?.full_name || t.appName}" referrerpolicy="no-referrer">
+            <img src="${profile?.avatar_url || 'MotionMindAI_small.png'}" alt="${profile?.full_name || t.appName}" referrerpolicy="no-referrer">
           </button>
           <div class="header__dropdown" id="user-dropdown" style="display:none">
             <div class="header__dropdown-info">

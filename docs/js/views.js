@@ -1,6 +1,5 @@
 import { t } from './i18n.js';
 import {
-  iconTimeSaving, iconCertificate, iconBrain,
   iconArrowRight, iconChevronLeft, iconClock, iconUsers, iconExercise,
   iconInstructor, emptyStateIllustration, iconTarget,
   iconKey, iconCheck, iconTrash, iconAlert, iconEdit, iconDumbbell,
@@ -25,7 +24,7 @@ export function renderLogin() {
   return `
     <div class="login-page">
       <div class="login-card">
-        <img src="MotionMindAI_nobg.png" alt="${t.appName}" class="login-card__logo">
+        <img src="MotionMindAI_small.png" alt="${t.appName}" class="login-card__logo">
         <h1 class="login-card__title">${t.appName}</h1>
         <p class="login-card__subtitle">${t.auth.loginSubtitle}</p>
         <button type="button" class="google-btn" id="google-signin-btn">
@@ -118,7 +117,7 @@ export function renderHome() {
         </div>
         <div class="hero__content">
           <div class="hero__logo">
-            <img src="MotionMindAI_nobg.png" alt="${t.appName}" class="hero__logo-img" />
+            <img src="MotionMindAI_large.png" alt="${t.appName}" class="hero__logo-img" />
           </div>
           <h1 class="hero__title">${t.hero.title}</h1>
           <p class="hero__subtitle">${t.hero.subtitle}</p>
@@ -135,26 +134,7 @@ export function renderHome() {
         </div>
       </section>
 
-      <!-- Features -->
       <div class="container">
-        <div class="features stagger-enter">
-          <div class="feature-card">
-            <div class="feature-card__icon feature-card__icon--time">${iconTimeSaving()}</div>
-            <div class="feature-card__title">${t.features.time.title}</div>
-            <div class="feature-card__desc">${t.features.time.desc}</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-card__icon feature-card__icon--quality">${iconCertificate()}</div>
-            <div class="feature-card__title">${t.features.quality.title}</div>
-            <div class="feature-card__desc">${t.features.quality.desc}</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-card__icon feature-card__icon--ai">${iconBrain()}</div>
-            <div class="feature-card__title">${t.features.ai.title}</div>
-            <div class="feature-card__desc">${t.features.ai.desc}</div>
-          </div>
-        </div>
-
         <section class="how-it-works">
           <h2 class="section-title">${t.howItWorks.title}</h2>
           <div class="steps">
