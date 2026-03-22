@@ -16,7 +16,7 @@ export async function loadApiKey() {
     .from('app_settings')
     .select('value')
     .eq('key', 'gemini_api_key')
-    .single();
+    .maybeSingle();
   cachedApiKey = data?.value || '';
 }
 
@@ -396,7 +396,7 @@ export async function getLessonById(id) {
     .from('lessons')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
   if (error || !data) return null;
   return { ...data.data, id: data.id };
 }
@@ -450,7 +450,7 @@ export async function getProgramById(id) {
     .from('programs')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
   if (error || !data) return null;
   return { ...data.data, id: data.id };
 }
