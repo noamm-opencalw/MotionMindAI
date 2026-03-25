@@ -66,6 +66,12 @@ export async function signInWithGoogle() {
   if (error) throw error;
 }
 
+export async function signInAnonymously() {
+  const { data, error } = await supabase.auth.signInAnonymously();
+  if (error) throw error;
+  currentUser = data.user;
+}
+
 export async function signOut() {
   await supabase.auth.signOut();
   currentUser = null;
@@ -79,7 +85,8 @@ export async function signOut() {
 // =============================
 export function getUser() { return currentUser; }
 export function getProfile() { return currentProfile; }
-export function isLoggedIn() { return !!currentUser && !!currentProfile; }
+export function isLoggedIn() { return !!currentUser && (!!currentProfile || isGuest()); }
+export function isGuest() { return currentUser?.is_anonymous === true; }
 export function isAdmin() { return currentProfile?.role === 'admin'; }
 export function isLocked() { return currentProfile?.is_locked === true; }
 
