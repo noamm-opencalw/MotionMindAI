@@ -13,6 +13,7 @@ export const t = {
     loginTitle: 'ברוכים הבאים',
     loginSubtitle: 'התחבר כדי ליצור תוכניות אימון מותאמות אישית',
     loginWithGoogle: 'התחבר עם Google',
+    loginAsGuest: 'כניסה כאורח',
     logout: 'התנתק',
     lockedTitle: 'החשבון שלך נעול',
     lockedDesc: 'אנא פנה למנהל המערכת לפתיחת החשבון.',

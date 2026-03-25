@@ -15,7 +15,7 @@ import {
   deleteLesson, generateProgram, getAllPrograms, getProgramById, deleteProgram,
   getAllUsers, toggleUserLock, deleteUser, getUserLessonsCount, getUserProgramsCount,
 } from './api.js';
-import { signInWithGoogle, isAdmin, getFirstName, getTimeGreeting, getProfile } from './auth.js';
+import { signInWithGoogle, signInAnonymously, isAdmin, getFirstName, getTimeGreeting, getProfile } from './auth.js';
 
 // =============================
 // LOGIN VIEW
@@ -36,6 +36,13 @@ export function renderLogin() {
           </svg>
           ${t.auth.loginWithGoogle}
         </button>
+        <div class="login-card__divider">
+          <span>או</span>
+        </div>
+        <button type="button" class="guest-btn" id="guest-signin-btn">
+          <span class="material-symbols-outlined" style="font-size:20px">person</span>
+          ${t.auth.loginAsGuest}
+        </button>
       </div>
     </div>
   `;
@@ -48,6 +55,15 @@ export function initLogin() {
     } catch (err) {
       console.error('Login error:', err);
       showToast('שגיאה בהתחברות. נסה שנית.', 'error');
+    }
+  });
+  document.getElementById('guest-signin-btn')?.addEventListener('click', async () => {
+    try {
+      await signInAnonymously();
+      window.location.reload();
+    } catch (err) {
+      console.error('Guest login error:', err);
+      showToast('שגיאה בכניסה כאורח. נסה שנית.', 'error');
     }
   });
 }
