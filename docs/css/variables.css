@@ -76,7 +76,7 @@
   --color-cooldown-light: #cffafe;
 
   /* Gradients — Spearit! */
-  --gradient-hero: linear-gradient(135deg, #3A2868 0%, #4A3580 40%, #E8845C 100%);
+  --gradient-hero: linear-gradient(135deg, #4A3580 0%, #6B52B5 35%, #E8845C 100%);
   --gradient-button: linear-gradient(135deg, #4A3580 0%, #5B44A0 100%);
   --gradient-button-hover: linear-gradient(135deg, #3A2868 0%, #4A3580 100%);
   --gradient-card-accent: linear-gradient(180deg, #4A3580 0%, #5B44A0 100%);

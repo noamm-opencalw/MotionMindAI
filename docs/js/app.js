@@ -128,8 +128,7 @@ function createAppShell() {
         </div>
       </div>
       <a href="#/" class="header__logo" style="text-decoration:none">
-        <img src="spearit_small.png" alt="${t.appName}" style="width:32px;height:32px;border-radius:var(--radius-sm)">
-        <span class="header__title">${t.appName}</span>
+        <img src="spearit.png" alt="${t.appName}" style="height:28px;">
       </a>
       <nav class="header__nav" style="display:none">
         <a href="#/" class="header__nav-item" data-view="home">${t.nav.home}</a>
