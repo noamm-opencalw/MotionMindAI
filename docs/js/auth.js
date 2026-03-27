@@ -66,6 +66,16 @@ export async function signInWithGoogle() {
   if (error) throw error;
 }
 
+export async function signInWithApple() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'apple',
+    options: {
+      redirectTo: window.location.origin + window.location.pathname,
+    },
+  });
+  if (error) throw error;
+}
+
 export async function signInAnonymously() {
   const { data, error } = await supabase.auth.signInAnonymously();
   if (error) throw error;

@@ -1,4 +1,4 @@
-import { supabase, getUser, isAdmin } from './auth.js';
+import { supabase, getUser, isAdmin, isGuest } from './auth.js';
 
 // =============================
 // CONFIGURATION
@@ -309,6 +309,11 @@ export async function generateLesson({ targetAge, gender, focusAreas, durationMi
       note: '',
     })),
   };
+
+  // Guest users can generate but not save history
+  if (isGuest()) {
+    return { ...lessonData, id: `guest-${Date.now()}` };
+  }
 
   const { data, error } = await supabase
     .from('lessons')

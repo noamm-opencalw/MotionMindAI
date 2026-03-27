@@ -2,8 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using MotionMind.Core.Interfaces;
 using MotionMind.Infrastructure.Data;
 using MotionMind.Infrastructure.Services;
+using Sentry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ── Sentry ───────────────────────────────────────────────────────────────────
+builder.WebHost.UseSentry(o =>
+{
+    o.Dsn = builder.Configuration["Sentry:Dsn"]
+        ?? Environment.GetEnvironmentVariable("SENTRY__DSN")
+        ?? "";
+    o.TracesSampleRate = 1.0;
+    o.SendDefaultPii = false;
+});
 
 // ── Services ─────────────────────────────────────────────────────────────────
 
