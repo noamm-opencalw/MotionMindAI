@@ -68,7 +68,7 @@ export function initLogin() {
       await signInWithApple();
     } catch (err) {
       console.error('Apple login error:', err);
-      showToast('שגיאה בהתחברות עם Apple. נסה שנית.', 'error');
+      showToast('כניסה עם Apple עדיין לא זמינה. נסה עם Google.', 'error');
     }
   });
   document.getElementById('guest-signin-btn')?.addEventListener('click', async () => {
@@ -77,7 +77,10 @@ export function initLogin() {
       window.location.reload();
     } catch (err) {
       console.error('Guest login error:', err);
-      showToast('שגיאה בכניסה כאורח. נסה שנית.', 'error');
+      const msg = err.message?.includes('Anonymous sign-ins are disabled')
+        ? 'כניסה כאורח לא מופעלת. יש להפעיל Anonymous sign-ins ב-Supabase.'
+        : 'שגיאה בכניסה כאורח. נסה שנית.';
+      showToast(msg, 'error');
     }
   });
 }
