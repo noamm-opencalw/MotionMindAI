@@ -1,33 +1,33 @@
 :root {
   /* ========================
-     MATERIAL DESIGN 3 — Teal/Rose Theme
+     MATERIAL DESIGN 3 — Spearit! Indigo/Coral Theme
      ======================== */
 
-  /* Primary (Teal) */
-  --color-primary: #005e53;
-  --color-primary-hover: #00796b;
-  --color-primary-light: #97f3e2;
-  --color-primary-50: #e0f2f1;
-  --color-primary-container: #00796b;
+  /* Primary (Indigo) */
+  --color-primary: #4A3580;
+  --color-primary-hover: #5B44A0;
+  --color-primary-light: #C9B8F0;
+  --color-primary-50: #EDE8F5;
+  --color-primary-container: #5B44A0;
   --color-on-primary: #ffffff;
-  --color-on-primary-container: #a1feec;
-  --color-primary-fixed: #97f3e2;
-  --color-primary-fixed-dim: #7ad7c6;
-  --color-inverse-primary: #7ad7c6;
+  --color-on-primary-container: #E0D4FF;
+  --color-primary-fixed: #C9B8F0;
+  --color-primary-fixed-dim: #A68EDB;
+  --color-inverse-primary: #A68EDB;
 
-  /* Secondary (Rose) */
-  --color-secondary: #825151;
-  --color-secondary-hover: #673a3b;
-  --color-secondary-light: #ffdad9;
-  --color-secondary-container: #ffbfbf;
+  /* Secondary (Coral) */
+  --color-secondary: #E8845C;
+  --color-secondary-hover: #D06A42;
+  --color-secondary-light: #FFE0D3;
+  --color-secondary-container: #FFCDB8;
   --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #7b4b4b;
+  --color-on-secondary-container: #C4603A;
 
-  /* Tertiary (Green) */
-  --color-tertiary: #475838;
-  --color-tertiary-container: #5f714e;
+  /* Tertiary (Teal) */
+  --color-tertiary: #2EAAA0;
+  --color-tertiary-container: #3CC4B8;
   --color-on-tertiary: #ffffff;
-  --color-on-tertiary-container: #e0f4c9;
+  --color-on-tertiary-container: #B8F0EA;
 
   /* Surfaces */
   --color-bg: #fbf9f9;
@@ -41,7 +41,7 @@
   --color-surface-container-highest: #e3e2e2;
   --color-surface-container-lowest: #ffffff;
   --color-surface-variant: #e3e2e2;
-  --color-surface-tint: #006b5e;
+  --color-surface-tint: #4A3580;
   --color-border: #bdc9c5;
   --color-border-light: #e3e2e2;
 
@@ -68,18 +68,18 @@
   --color-warmup-light: #fef3c7;
   --color-core: #e74c3c;
   --color-core-light: #fde8e8;
-  --color-strength: #00796b;
-  --color-strength-light: #e0f2f1;
+  --color-strength: #4A3580;
+  --color-strength-light: #EDE8F5;
   --color-flexibility: #7c5cbf;
   --color-flexibility-light: #ede9fe;
   --color-cooldown: #0891b2;
   --color-cooldown-light: #cffafe;
 
-  /* Gradients — Teal */
-  --gradient-hero: linear-gradient(135deg, #004d40 0%, #00796b 40%, #009688 100%);
-  --gradient-button: linear-gradient(135deg, #005e53 0%, #00796b 100%);
-  --gradient-button-hover: linear-gradient(135deg, #004d40 0%, #005e53 100%);
-  --gradient-card-accent: linear-gradient(180deg, #005e53 0%, #00796b 100%);
+  /* Gradients — Spearit! */
+  --gradient-hero: linear-gradient(135deg, #3A2868 0%, #4A3580 40%, #E8845C 100%);
+  --gradient-button: linear-gradient(135deg, #4A3580 0%, #5B44A0 100%);
+  --gradient-button-hover: linear-gradient(135deg, #3A2868 0%, #4A3580 100%);
+  --gradient-card-accent: linear-gradient(180deg, #4A3580 0%, #5B44A0 100%);
 
   /* Typography */
   --font-family: 'Lexend', 'Heebo', sans-serif;
@@ -131,8 +131,8 @@
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
   --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.04);
-  --shadow-glow: 0 0 20px rgba(0,94,83,0.3);
-  --shadow-glow-secondary: 0 0 20px rgba(130,81,81,0.3);
+  --shadow-glow: 0 0 20px rgba(74,53,128,0.3);
+  --shadow-glow-secondary: 0 0 20px rgba(232,132,92,0.3);
   --shadow-nav: 0 -4px 24px rgba(0,0,0,0.04);
 
   /* Transitions */

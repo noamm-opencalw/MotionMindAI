@@ -43,8 +43,8 @@
   font-family: var(--font-family);
   font-size: var(--text-2xl);
   font-weight: var(--font-weight-black);
-  color: #004d40;
-  -webkit-text-fill-color: #004d40;
+  color: #4A3580;
+  -webkit-text-fill-color: #4A3580;
   background: none;
   -webkit-background-clip: unset;
   background-clip: unset;
@@ -256,7 +256,7 @@
 
 .bottom-nav__item.active {
   background: var(--color-primary-50);
-  color: #004d40;
+  color: #4A3580;
 }
 
 .bottom-nav__item.active .material-symbols-outlined {

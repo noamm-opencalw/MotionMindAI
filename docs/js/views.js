@@ -24,8 +24,9 @@ export function renderLogin() {
   return `
     <div class="login-page">
       <div class="login-card">
-        <img src="MotionMindAI_small_transparent.png" alt="${t.appName}" class="login-card__logo">
+        <img src="spearit_small.png" alt="${t.appName}" class="login-card__logo">
         <h1 class="login-card__title">${t.appName}</h1>
+        <p class="login-card__tagline" style="font-size:0.95rem;color:var(--color-secondary);font-weight:500;margin:-4px 0 8px">${t.appTagline}</p>
         <p class="login-card__subtitle">${t.auth.loginSubtitle}</p>
         <button type="button" class="google-btn" id="google-signin-btn">
           <svg class="google-btn__icon" viewBox="0 0 24 24">
@@ -35,12 +36,6 @@ export function renderLogin() {
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
           ${t.auth.loginWithGoogle}
-        </button>
-        <button type="button" class="apple-btn" id="apple-signin-btn">
-          <svg class="apple-btn__icon" viewBox="0 0 24 24">
-            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
-          </svg>
-          ${t.auth.loginWithApple}
         </button>
         <div class="login-card__divider">
           <span>או</span>
@@ -144,7 +139,7 @@ export function renderHome() {
         </div>
         <div class="hero__content">
           <div class="hero__logo">
-            <img src="MotionMindAI_large_transparent.png" alt="${t.appName}" class="hero__logo-img" />
+            <img src="spearit_large.png" alt="${t.appName}" class="hero__logo-img" />
           </div>
           <div class="greeting">
             <h2 class="greeting__text" style="color:#fff">${greeting}</h2>
@@ -351,12 +346,6 @@ export function renderLessons() {
           </svg>
           ${t.auth.loginWithGoogle}
         </button>
-        <button type="button" class="apple-btn" id="guest-upgrade-apple">
-          <svg class="apple-btn__icon" viewBox="0 0 24 24">
-            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
-          </svg>
-          ${t.auth.loginWithApple}
-        </button>
       </div>
     </div></div>`;
   }
@@ -369,7 +358,6 @@ export function renderLessons() {
 export async function initLessons() {
   // Guest upgrade buttons
   document.getElementById('guest-upgrade-google')?.addEventListener('click', () => signInWithGoogle());
-  document.getElementById('guest-upgrade-apple')?.addEventListener('click', () => signInWithApple());
   if (isGuest()) return;
 
   const content = document.getElementById('lessons-content');
@@ -1001,7 +989,7 @@ async function loadAdminUsers() {
       <div class="admin-users">
         ${usersWithCounts.map(user => `
           <div class="admin-user-card ${user.is_locked ? 'admin-user-card--locked' : ''}">
-            <img src="${user.avatar_url || 'MotionMindAI_nobg.png'}" alt="${user.full_name}" class="admin-user-card__avatar" referrerpolicy="no-referrer">
+            <img src="${user.avatar_url || 'spearit_nobg.png'}" alt="${user.full_name}" class="admin-user-card__avatar" referrerpolicy="no-referrer">
             <div class="admin-user-card__info">
               <div class="admin-user-card__name">
                 ${user.full_name || user.email}

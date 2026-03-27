@@ -113,7 +113,7 @@ function createAppShell() {
         <span class="header__notification">${iconNotifications()}</span>
         <div class="header__user-menu">
           <button class="header__avatar-btn" id="user-menu-btn" type="button">
-            <img src="${profile?.avatar_url || 'MotionMindAI_small_transparent.png'}" alt="${profile?.full_name || t.appName}" referrerpolicy="no-referrer">
+            <img src="${profile?.avatar_url || 'spearit_small.png'}" alt="${profile?.full_name || t.appName}" referrerpolicy="no-referrer">
           </button>
           <div class="header__dropdown" id="user-dropdown" style="display:none">
             <div class="header__dropdown-info">
@@ -128,7 +128,7 @@ function createAppShell() {
         </div>
       </div>
       <a href="#/" class="header__logo" style="text-decoration:none">
-        <img src="MotionMindAI_small_transparent.png" alt="${t.appName}" style="width:32px;height:32px;border-radius:var(--radius-sm)">
+        <img src="spearit_small.png" alt="${t.appName}" style="width:32px;height:32px;border-radius:var(--radius-sm)">
         <span class="header__title">${t.appName}</span>
       </a>
       <nav class="header__nav" style="display:none">

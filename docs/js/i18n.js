@@ -1,6 +1,6 @@
 export const t = {
-  appName: 'פאר טוסיק',
-  appTagline: 'תוכניות אימון חכמות',
+  appName: 'Spearit!',
+  appTagline: 'Maayan Romach Fitness & Pilates',
 
   nav: {
     home: 'בית',
