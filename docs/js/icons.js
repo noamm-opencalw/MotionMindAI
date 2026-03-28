@@ -127,7 +127,7 @@ export function emptyStateIllustration() {
 
 // Logo icon - PNG image
 export function logoIcon() {
-  return `<img src="spearit_small.png" alt="Spearit!" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">`;
+  return `<img src="spearit_small.png" alt="Spearit!" style="height:32px;">`;
 }
 
 // Category icon mapper
