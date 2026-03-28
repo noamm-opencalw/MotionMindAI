@@ -146,7 +146,7 @@ def create_agents(llm: LLM) -> dict[str, Agent]:
             "fitness platform."
         ),
         backstory=(
-            "You are the head coach at Spearit! — Maayan Romach Fitness & Pilates. "
+            "You are the head coach at Spearit! — Fitness & Pilates. "
             "You are the final quality gate. Every workout that leaves your hands "
             "must be world-class: professional Hebrew coaching cues that a trainer "
             "can read aloud, smooth exercise transitions, motivating energy, and "

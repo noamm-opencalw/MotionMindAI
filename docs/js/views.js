@@ -139,7 +139,7 @@ export function renderHome() {
         </div>
         <div class="hero__content">
           <div class="hero__logo">
-            <img src="spearit.png" alt="${t.appName}" class="hero__logo-img" />
+            <img src="spearit_large.png" alt="${t.appName}" class="hero__logo-img" />
           </div>
           <div class="greeting">
             <h2 class="greeting__text" style="color:#fff">${greeting}</h2>
@@ -492,12 +492,22 @@ export function renderProgramCreate() {
   const hasKey = hasApiKey();
   const admin = isAdmin();
 
+  const strengthMachines = t.gymMachineOptions.filter(o => !['treadmill','elliptical','bike','rower'].includes(o.icon));
+  const cardioMachines = t.gymMachineOptions.filter(o => ['treadmill','elliptical','bike','rower'].includes(o.icon));
+
   return `
     <div class="page page-enter"><div class="container container--narrow">
       <h1 class="section-title">${t.program.title}</h1>
       <p class="section-subtitle" style="margin-bottom:var(--space-6)">${t.program.subtitle}</p>
 
       ${!hasKey ? `<a href="${admin ? '#/settings' : '#/'}" class="api-banner" style="margin-bottom:var(--space-4)"><div class="api-banner__icon">${iconAlert()}</div><div class="api-banner__text"><strong>${admin ? t.errors.noApiKey : t.errors.noApiKeyUser}</strong></div>${admin ? `<div class="api-banner__arrow">${iconArrowRight()}</div>` : ''}</a>` : ''}
+
+      <!-- Live Summary -->
+      <div class="card" id="program-summary" style="display:none;margin-bottom:var(--space-4);border:2px solid var(--color-primary-50)">
+        <div class="card__body" style="padding:var(--space-3) var(--space-4)">
+          <div id="program-summary-content" style="display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center;font-size:var(--text-sm);color:var(--color-text-secondary)"></div>
+        </div>
+      </div>
 
       <form id="program-form" class="generate-form">
         <!-- Goal -->
@@ -512,29 +522,37 @@ export function renderProgramCreate() {
           </div>
         </div></div></div>
 
-        <!-- Timeframe -->
+        <!-- Timeframe & Schedule combined -->
         <div class="card generate-card"><div class="card__body"><div class="form-group">
           <label class="form-label">${iconClock()} ${t.program.timeframeLabel}</label>
           <div class="pill-group" data-field="timeframe">
             ${t.program.timeframes.map(tf => `<button type="button" class="pill" data-value="${tf.value}">${tf.label}</button>`).join('')}
           </div>
+          <div style="margin-top:var(--space-4)">
+            <label class="form-label-sm">${t.program.daysPerWeekLabel}</label>
+            <div class="pill-group" data-field="daysPerWeek" style="justify-content:center">
+              ${[2,3,4,5,6].map(d => `<button type="button" class="pill ${d === 4 ? 'active' : ''}" data-value="${d}">${d}</button>`).join('')}
+            </div>
+          </div>
+          <div style="margin-top:var(--space-3)">
+            <label class="form-label-sm">${t.program.sessionDurationLabel}</label>
+            <div class="pill-group" data-field="sessionDuration" style="justify-content:center">
+              ${[30,45,60,75,90].map(d => `<button type="button" class="pill ${d === 60 ? 'active' : ''}" data-value="${d}">${d} ${t.generate.durationUnit}</button>`).join('')}
+            </div>
+          </div>
         </div></div></div>
 
-        <!-- Gender & Age -->
+        <!-- About You: Gender, Age, Weight, Fitness Level -->
         <div class="card generate-card"><div class="card__body"><div class="form-group">
-          <label class="form-label">${t.program.genderLabel}</label>
-          <div class="pill-group" data-field="gender">
+          <label class="form-label"><span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle">person</span> קצת עליך</label>
+          <div class="pill-group" data-field="gender" style="margin-bottom:var(--space-3)">
             ${t.program.genders.map(g => `<button type="button" class="pill" data-value="${g.value}">${g.label}</button>`).join('')}
           </div>
-          <div style="display:flex;gap:var(--space-3);margin-top:var(--space-3)">
+          <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-4)">
             <div style="flex:1"><label class="form-label-sm">${t.program.ageLabel}</label><input type="number" id="program-age" class="settings-input" placeholder="${t.program.agePlaceholder}" style="font-family:var(--font-family);direction:ltr" /></div>
             <div style="flex:1"><label class="form-label-sm">${t.program.weightLabel}</label><input type="number" id="program-weight" class="settings-input" placeholder="${t.program.weightPlaceholder}" style="font-family:var(--font-family);direction:ltr" /></div>
           </div>
-        </div></div></div>
-
-        <!-- Fitness Level -->
-        <div class="card generate-card"><div class="card__body"><div class="form-group">
-          <label class="form-label">${t.program.fitnessLevelLabel}</label>
+          <label class="form-label-sm">${t.program.fitnessLevelLabel}</label>
           <div class="pill-group pill-group--wrap" data-field="fitnessLevel">
             ${t.program.fitnessLevels.map(fl => `<button type="button" class="pill" data-value="${fl.value}">${fl.label}</button>`).join('')}
           </div>
@@ -542,7 +560,7 @@ export function renderProgramCreate() {
 
         <!-- Location -->
         <div class="card generate-card"><div class="card__body"><div class="form-group">
-          <label class="form-label">${t.program.locationLabel}</label>
+          <label class="form-label"><span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle">location_on</span> ${t.program.locationLabel}</label>
           <div class="pill-group" data-field="location">
             ${t.program.locations.map(l => `<button type="button" class="pill" data-value="${l.value}">${l.label}</button>`).join('')}
           </div>
@@ -558,30 +576,29 @@ export function renderProgramCreate() {
 
         <!-- Gym Machines (shown when location=gym or mixed) -->
         <div class="card generate-card" id="gym-machines-card" style="display:none"><div class="card__body"><div class="form-group">
-          <label class="form-label">${iconDumbbell()} ${t.gymMachinesLabel}</label>
-          <p class="form-hint">${t.gymMachinesHint}</p>
-          <div class="equipment-grid" data-field="gymMachines">
-            ${t.gymMachineOptions.map(opt => `<button type="button" class="equipment-card" data-value="${opt.value}">${gymMachineIcon(opt.icon)}<span class="equipment-card__label">${opt.label}</span></button>`).join('')}
-          </div>
-        </div></div></div>
-
-        <!-- Schedule -->
-        <div class="card generate-card"><div class="card__body"><div class="form-group">
-          <label class="form-label">${t.program.daysPerWeekLabel}</label>
-          <div class="pill-group" data-field="daysPerWeek" style="justify-content:center">
-            ${[2,3,4,5,6].map(d => `<button type="button" class="pill ${d === 4 ? 'active' : ''}" data-value="${d}">${d}</button>`).join('')}
-          </div>
-          <div style="margin-top:var(--space-3)">
-            <label class="form-label-sm">${t.program.sessionDurationLabel}</label>
-            <div class="pill-group" data-field="sessionDuration" style="justify-content:center">
-              ${[30,45,60,75,90].map(d => `<button type="button" class="pill ${d === 60 ? 'active' : ''}" data-value="${d}">${d} ${t.generate.durationUnit}</button>`).join('')}
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)">
+            <label class="form-label" style="margin-bottom:0">${iconDumbbell()} ${t.gymMachinesLabel}</label>
+            <div style="display:flex;gap:var(--space-2);align-items:center">
+              <span id="gym-machines-counter" class="badge badge--primary" style="font-size:var(--text-xs);display:none">0 נבחרו</span>
+              <button type="button" class="btn btn--secondary btn--sm" id="gym-select-all-btn">בחר הכל</button>
             </div>
+          </div>
+          <p class="form-hint" style="margin-bottom:var(--space-3)">${t.gymMachinesHint}</p>
+
+          <label class="form-label-sm" style="margin-bottom:var(--space-2)"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle">fitness_center</span> מכונות כוח</label>
+          <div class="equipment-grid" data-field="gymMachines" style="margin-bottom:var(--space-4)">
+            ${strengthMachines.map(opt => `<button type="button" class="equipment-card" data-value="${opt.value}">${gymMachineIcon(opt.icon)}<span class="equipment-card__label">${opt.label}</span></button>`).join('')}
+          </div>
+
+          <label class="form-label-sm" style="margin-bottom:var(--space-2)"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle">monitor_heart</span> מכונות קרדיו</label>
+          <div class="equipment-grid" data-field="gymMachines">
+            ${cardioMachines.map(opt => `<button type="button" class="equipment-card" data-value="${opt.value}">${gymMachineIcon(opt.icon)}<span class="equipment-card__label">${opt.label}</span></button>`).join('')}
           </div>
         </div></div></div>
 
         <!-- Limitations -->
         <div class="card generate-card"><div class="card__body"><div class="form-group">
-          <label class="form-label">${t.program.limitationsLabel}</label>
+          <label class="form-label"><span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle">healing</span> ${t.program.limitationsLabel}</label>
           <textarea id="program-limitations" class="settings-input" style="font-family:var(--font-family);direction:rtl;text-align:right;min-height:60px;resize:vertical" placeholder="${t.program.limitationsPlaceholder}"></textarea>
         </div></div></div>
 
@@ -600,6 +617,51 @@ export function initProgramCreate() {
   const state = { goal: null, timeframe: null, gender: null, fitnessLevel: null, location: null, equipment: [], gymMachines: [], daysPerWeek: 4, sessionDuration: 60 };
 
   const gymMachinesCard = document.getElementById('gym-machines-card');
+  const gymCounter = document.getElementById('gym-machines-counter');
+  const selectAllBtn = document.getElementById('gym-select-all-btn');
+  const summaryCard = document.getElementById('program-summary');
+  const summaryContent = document.getElementById('program-summary-content');
+  const allGymCards = form.querySelectorAll('.equipment-grid[data-field="gymMachines"] .equipment-card');
+  const totalMachines = allGymCards.length;
+
+  // Labels for summary display
+  const goalLabels = {};
+  t.program.goals.forEach(g => { goalLabels[g.value] = g.label; });
+  const timeframeLabels = {};
+  t.program.timeframes.forEach(tf => { timeframeLabels[tf.value] = tf.label; });
+  const locationLabels = {};
+  t.program.locations.forEach(l => { locationLabels[l.value] = l.label; });
+  const fitnessLabels = {};
+  t.program.fitnessLevels.forEach(fl => { fitnessLabels[fl.value] = fl.label; });
+
+  function updateGymCounter() {
+    const count = state.gymMachines.length;
+    if (gymCounter) {
+      gymCounter.style.display = count > 0 ? '' : 'none';
+      gymCounter.textContent = `${count} נבחרו`;
+    }
+    if (selectAllBtn) {
+      selectAllBtn.textContent = count === totalMachines ? 'נקה הכל' : 'בחר הכל';
+    }
+  }
+
+  function updateSummary() {
+    const parts = [];
+    if (state.goal) parts.push(`<span class="badge badge--primary">${goalLabels[state.goal] || state.goal}</span>`);
+    if (state.timeframe) parts.push(`<span class="badge badge--primary">${timeframeLabels[state.timeframe]}</span>`);
+    if (state.gender) parts.push(`<span class="badge badge--primary">${state.gender === 'male' ? 'זכר' : 'נקבה'}</span>`);
+    if (state.fitnessLevel) parts.push(`<span class="badge badge--primary">${fitnessLabels[state.fitnessLevel]}</span>`);
+    if (state.location) parts.push(`<span class="badge badge--primary">${locationLabels[state.location]}</span>`);
+    parts.push(`<span class="badge badge--primary">${state.daysPerWeek}x שבוע</span>`);
+    parts.push(`<span class="badge badge--primary">${state.sessionDuration} דק׳</span>`);
+    const eqCount = state.equipment.length + state.gymMachines.length;
+    if (eqCount > 0) parts.push(`<span class="badge badge--primary">${eqCount} ציוד</span>`);
+
+    if (summaryCard && summaryContent) {
+      summaryCard.style.display = parts.length > 2 ? '' : 'none';
+      summaryContent.innerHTML = parts.join('');
+    }
+  }
 
   // Single-select pills
   ['goal', 'timeframe', 'gender', 'fitnessLevel', 'location'].forEach(field => {
@@ -613,9 +675,11 @@ export function initProgramCreate() {
           gymMachinesCard.style.display = (pill.dataset.value === 'gym' || pill.dataset.value === 'mixed') ? '' : 'none';
           if (pill.dataset.value !== 'gym' && pill.dataset.value !== 'mixed') {
             state.gymMachines = [];
-            gymMachinesCard.querySelectorAll('.equipment-card').forEach(c => c.classList.remove('active'));
+            allGymCards.forEach(c => c.classList.remove('active'));
+            updateGymCounter();
           }
         }
+        updateSummary();
       });
     });
   });
@@ -627,6 +691,7 @@ export function initProgramCreate() {
         pill.closest('[data-field]').querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         state[field] = Number(pill.dataset.value);
+        updateSummary();
       });
     });
   });
@@ -638,18 +703,38 @@ export function initProgramCreate() {
       const value = card.dataset.value;
       if (card.classList.contains('active')) { if (!state.equipment.includes(value)) state.equipment.push(value); }
       else { state.equipment = state.equipment.filter(v => v !== value); }
+      updateSummary();
     });
   });
 
   // Gym machines multi-select
-  form.querySelectorAll('.equipment-grid[data-field="gymMachines"] .equipment-card').forEach(card => {
+  allGymCards.forEach(card => {
     card.addEventListener('click', () => {
       card.classList.toggle('active');
       const value = card.dataset.value;
       if (card.classList.contains('active')) { if (!state.gymMachines.includes(value)) state.gymMachines.push(value); }
       else { state.gymMachines = state.gymMachines.filter(v => v !== value); }
+      updateGymCounter();
+      updateSummary();
     });
   });
+
+  // Select All / Clear All for gym machines
+  if (selectAllBtn) {
+    selectAllBtn.addEventListener('click', () => {
+      const allSelected = state.gymMachines.length === totalMachines;
+      allGymCards.forEach(card => {
+        if (allSelected) {
+          card.classList.remove('active');
+        } else {
+          card.classList.add('active');
+        }
+      });
+      state.gymMachines = allSelected ? [] : t.gymMachineOptions.map(o => o.value);
+      updateGymCounter();
+      updateSummary();
+    });
+  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
