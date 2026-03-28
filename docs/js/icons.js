@@ -57,6 +57,24 @@ export function iconHoop() { return ms('radio_button_unchecked'); }
 export function iconRope() { return ms('straighten'); }
 export function iconBench() { return ms('table_restaurant'); }
 
+// Gym machine icons
+export function iconChestPress() { return ms('expand'); }
+export function iconLegPress() { return ms('sprint'); }
+export function iconLatPulldown() { return ms('download'); }
+export function iconShoulderPress() { return ms('keyboard_double_arrow_up'); }
+export function iconSeatedRow() { return ms('rowing'); }
+export function iconPecDeck() { return ms('open_with'); }
+export function iconSmithMachine() { return ms('power'); }
+export function iconLegCurl() { return ms('u_turn_right'); }
+export function iconLegExtension() { return ms('unfold_more'); }
+export function iconCableMachine() { return ms('cable'); }
+export function iconTreadmill() { return ms('directions_run'); }
+export function iconElliptical() { return ms('swap_vert'); }
+export function iconStationaryBike() { return ms('pedal_bike'); }
+export function iconRowingMachine() { return ms('kayaking'); }
+export function iconPullUpBar() { return ms('iron'); }
+export function iconDipStation() { return ms('vertical_align_bottom'); }
+
 // Utility icons
 export function iconKey() { return ms('key'); }
 export function iconCheck() { return ms('check'); }

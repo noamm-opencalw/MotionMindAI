@@ -8,6 +8,10 @@ import {
   iconRing, iconChair, iconWall, iconHoop, iconRope, iconBench,
   iconMusic, iconRefresh, iconChevronUp, iconChevronDown, iconNote, iconGrip,
   iconTrash,
+  iconChestPress, iconLegPress, iconLatPulldown, iconShoulderPress,
+  iconSeatedRow, iconPecDeck, iconSmithMachine, iconLegCurl, iconLegExtension,
+  iconCableMachine, iconTreadmill, iconElliptical, iconStationaryBike,
+  iconRowingMachine, iconPullUpBar, iconDipStation,
 } from './icons.js';
 
 // Exercise card for the timeline
@@ -219,6 +223,29 @@ export function equipmentIcon(iconName) {
     case 'bench': return iconBench();
     default: return iconDumbbell();
   }
+}
+
+// Gym machine icon mapper
+export function gymMachineIcon(iconName) {
+  const map = {
+    chest_press: iconChestPress(),
+    leg_press: iconLegPress(),
+    lat_pulldown: iconLatPulldown(),
+    shoulder_press: iconShoulderPress(),
+    rowing: iconSeatedRow(),
+    pec_deck: iconPecDeck(),
+    smith: iconSmithMachine(),
+    leg_curl: iconLegCurl(),
+    leg_extension: iconLegExtension(),
+    cable: iconCableMachine(),
+    treadmill: iconTreadmill(),
+    elliptical: iconElliptical(),
+    bike: iconStationaryBike(),
+    rower: iconRowingMachine(),
+    pull_up: iconPullUpBar(),
+    dip_station: iconDipStation(),
+  };
+  return map[iconName] || iconDumbbell();
 }
 
 // Toast notification

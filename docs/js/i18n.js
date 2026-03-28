@@ -107,6 +107,28 @@ export const t = {
     { value: 'ספסל שוודי', label: 'ספסל שוודי', icon: 'bench' },
   ],
 
+  gymMachineOptions: [
+    { value: 'Chest Press', label: 'Chest Press', icon: 'chest_press' },
+    { value: 'Leg Press', label: 'Leg Press', icon: 'leg_press' },
+    { value: 'Lat Pulldown', label: 'Lat Pulldown', icon: 'lat_pulldown' },
+    { value: 'Shoulder Press', label: 'Shoulder Press', icon: 'shoulder_press' },
+    { value: 'Seated Row', label: 'Seated Row', icon: 'rowing' },
+    { value: 'Pec Deck', label: 'Pec Deck', icon: 'pec_deck' },
+    { value: 'Smith Machine', label: 'Smith Machine', icon: 'smith' },
+    { value: 'Leg Curl', label: 'Leg Curl', icon: 'leg_curl' },
+    { value: 'Leg Extension', label: 'Leg Extension', icon: 'leg_extension' },
+    { value: 'Cable Machine', label: 'Cable Machine', icon: 'cable' },
+    { value: 'Treadmill', label: 'Treadmill', icon: 'treadmill' },
+    { value: 'Elliptical', label: 'Elliptical', icon: 'elliptical' },
+    { value: 'Stationary Bike', label: 'Stationary Bike', icon: 'bike' },
+    { value: 'Rowing Machine', label: 'Rowing Machine', icon: 'rower' },
+    { value: 'Pull-Up Bar', label: 'Pull-Up Bar', icon: 'pull_up' },
+    { value: 'Dip Station', label: 'Dip Station', icon: 'dip_station' },
+  ],
+
+  gymMachinesLabel: 'מכונות חדר כושר',
+  gymMachinesHint: 'בחר את המכונות הזמינות לך',
+
   focusOptions: [
     { value: 'Core Strength', label: 'חיזוק ליבה', icon: 'core' },
     { value: 'Flexibility', label: 'גמישות', icon: 'flexibility' },

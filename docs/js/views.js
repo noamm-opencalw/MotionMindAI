@@ -6,7 +6,7 @@ import {
 } from './icons.js';
 import {
   exerciseCard, lessonCard, categoryBar, skeletonCards,
-  focusIcon, equipmentIcon, musicRecommendations,
+  focusIcon, equipmentIcon, gymMachineIcon, musicRecommendations,
   showToast, showLoading, hideLoading,
 } from './components.js';
 import {
@@ -556,6 +556,15 @@ export function renderProgramCreate() {
           </div>
         </div></div></div>
 
+        <!-- Gym Machines (shown when location=gym or mixed) -->
+        <div class="card generate-card" id="gym-machines-card" style="display:none"><div class="card__body"><div class="form-group">
+          <label class="form-label">${iconDumbbell()} ${t.gymMachinesLabel}</label>
+          <p class="form-hint">${t.gymMachinesHint}</p>
+          <div class="equipment-grid" data-field="gymMachines">
+            ${t.gymMachineOptions.map(opt => `<button type="button" class="equipment-card" data-value="${opt.value}">${gymMachineIcon(opt.icon)}<span class="equipment-card__label">${opt.label}</span></button>`).join('')}
+          </div>
+        </div></div></div>
+
         <!-- Schedule -->
         <div class="card generate-card"><div class="card__body"><div class="form-group">
           <label class="form-label">${t.program.daysPerWeekLabel}</label>
@@ -588,7 +597,9 @@ export function initProgramCreate() {
   const form = document.getElementById('program-form');
   if (!form) return;
 
-  const state = { goal: null, timeframe: null, gender: null, fitnessLevel: null, location: null, equipment: [], daysPerWeek: 4, sessionDuration: 60 };
+  const state = { goal: null, timeframe: null, gender: null, fitnessLevel: null, location: null, equipment: [], gymMachines: [], daysPerWeek: 4, sessionDuration: 60 };
+
+  const gymMachinesCard = document.getElementById('gym-machines-card');
 
   // Single-select pills
   ['goal', 'timeframe', 'gender', 'fitnessLevel', 'location'].forEach(field => {
@@ -597,6 +608,14 @@ export function initProgramCreate() {
         pill.closest('[data-field]').querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         state[field] = pill.dataset.value;
+        // Show/hide gym machines based on location
+        if (field === 'location' && gymMachinesCard) {
+          gymMachinesCard.style.display = (pill.dataset.value === 'gym' || pill.dataset.value === 'mixed') ? '' : 'none';
+          if (pill.dataset.value !== 'gym' && pill.dataset.value !== 'mixed') {
+            state.gymMachines = [];
+            gymMachinesCard.querySelectorAll('.equipment-card').forEach(c => c.classList.remove('active'));
+          }
+        }
       });
     });
   });
@@ -613,12 +632,22 @@ export function initProgramCreate() {
   });
 
   // Equipment multi-select
-  form.querySelectorAll('.equipment-grid .equipment-card').forEach(card => {
+  form.querySelectorAll('.equipment-grid[data-field="equipment"] .equipment-card').forEach(card => {
     card.addEventListener('click', () => {
       card.classList.toggle('active');
       const value = card.dataset.value;
       if (card.classList.contains('active')) { if (!state.equipment.includes(value)) state.equipment.push(value); }
       else { state.equipment = state.equipment.filter(v => v !== value); }
+    });
+  });
+
+  // Gym machines multi-select
+  form.querySelectorAll('.equipment-grid[data-field="gymMachines"] .equipment-card').forEach(card => {
+    card.addEventListener('click', () => {
+      card.classList.toggle('active');
+      const value = card.dataset.value;
+      if (card.classList.contains('active')) { if (!state.gymMachines.includes(value)) state.gymMachines.push(value); }
+      else { state.gymMachines = state.gymMachines.filter(v => v !== value); }
     });
   });
 
@@ -629,8 +658,10 @@ export function initProgramCreate() {
 
     showLoading();
     try {
+      const allEquipment = [...state.equipment, ...state.gymMachines];
       const program = await generateProgram({
         ...state,
+        equipment: allEquipment,
         goalCustom: document.getElementById('goal-custom')?.value.trim() || '',
         age: document.getElementById('program-age')?.value.trim() || '',
         weight: document.getElementById('program-weight')?.value.trim() || '',
