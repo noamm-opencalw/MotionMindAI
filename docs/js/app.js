@@ -110,7 +110,6 @@ function createAppShell() {
   if (header) {
     header.innerHTML = `
       <div class="header__actions">
-        <span class="header__notification">${iconNotifications()}</span>
         <div class="header__user-menu">
           <button class="header__avatar-btn" id="user-menu-btn" type="button">
             <img src="${profile?.avatar_url || 'spearit_small.png'}" alt="${profile?.full_name || t.appName}" referrerpolicy="no-referrer">
@@ -128,7 +127,7 @@ function createAppShell() {
         </div>
       </div>
       <a href="#/" class="header__logo" style="text-decoration:none">
-        <img src="spearit.png" alt="${t.appName}" style="height:28px;">
+        <img src="spearit.png" alt="${t.appName}" style="height:28px;width:auto;">
       </a>
       <nav class="header__nav" style="display:none">
         <a href="#/" class="header__nav-item" data-view="home">${t.nav.home}</a>

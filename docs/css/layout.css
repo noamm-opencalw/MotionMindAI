@@ -101,19 +101,17 @@
 }
 
 .header__avatar-btn {
-  width: 40px;
   height: 40px;
   border-radius: var(--radius-full);
   overflow: hidden;
-  border: 2px solid var(--color-outline-variant);
+  border: none;
   cursor: pointer;
   padding: 0;
-  background: var(--color-surface-container);
-  transition: border-color var(--transition-fast);
+  background: none;
 }
 
 .header__avatar-btn:hover {
-  border-color: var(--color-primary);
+  opacity: 0.8;
 }
 
 .header__avatar-btn img {

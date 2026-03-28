@@ -40,10 +40,14 @@
 .hero__logo {
   margin: 0 auto var(--space-6);
   height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .hero__logo-img {
   height: 100%;
+  width: auto;
   animation: hero-logo-float 4s ease-in-out infinite;
 }
 

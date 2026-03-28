@@ -139,7 +139,7 @@ export function renderHome() {
         </div>
         <div class="hero__content">
           <div class="hero__logo">
-            <img src="spearit_large.png" alt="${t.appName}" class="hero__logo-img" />
+            <img src="spearit.png" alt="${t.appName}" class="hero__logo-img" />
           </div>
           <div class="greeting">
             <h2 class="greeting__text" style="color:#fff">${greeting}</h2>

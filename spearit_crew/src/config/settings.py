@@ -16,7 +16,7 @@ def get_llm(api_key: str | None = None, temperature: float = 0.7) -> LLM:
     """Create a Gemini LLM instance. Accepts per-request API key override."""
     key = api_key or GEMINI_API_KEY
     return LLM(
-        model="gemini/gemini-2.5-flash",
+        model="gemini/gemini-2.5-flash-lite",
         api_key=key,
         temperature=temperature,
     )
