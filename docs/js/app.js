@@ -1,6 +1,6 @@
 import { t } from './i18n.js';
 import { iconHome, iconSparkle, iconList, iconSettings, iconTarget, iconNotifications } from './icons.js';
-import { initAuth, onAuthStateChange, signOut, isLoggedIn, isAdmin, isLocked, getProfile, getFirstName, getTimeGreeting } from './auth.js';
+import { initAuth, onAuthStateChange, signOut, isLoggedIn, isAdmin, isGuest, isLocked, getProfile, getFirstName, getTimeGreeting } from './auth.js';
 import { loadApiKey } from './api.js';
 import {
   renderHome,
@@ -22,7 +22,7 @@ const routes = [
   { pattern: /^#?\/?$/, view: 'home' },
   { pattern: /^#\/generate$/, view: 'generate' },
   { pattern: /^#\/lessons$/, view: 'lessons' },
-  { pattern: /^#\/lesson\/(\d+)$/, view: 'detail' },
+  { pattern: /^#\/lesson\/([\w-]+)$/, view: 'detail' },
   { pattern: /^#\/program$/, view: 'programCreate' },
   { pattern: /^#\/programs$/, view: 'programs' },
   { pattern: /^#\/program\/(\d+)$/, view: 'programDetail' },
@@ -134,7 +134,7 @@ function createAppShell() {
         <a href="#/" class="header__nav-item" data-view="home">${t.nav.home}</a>
         <a href="#/generate" class="header__nav-item" data-view="generate">${t.nav.generate}</a>
         <a href="#/program" class="header__nav-item" data-view="programCreate">${t.nav.program}</a>
-        <a href="#/lessons" class="header__nav-item" data-view="lessons">${t.nav.lessons}</a>
+        <a href="#/lessons" class="header__nav-item" data-view="lessons">${isGuest() ? t.nav.lessonsGuest : t.nav.lessons}</a>
         ${isAdmin() ? `<a href="#/settings" class="header__nav-item" data-view="settings">${t.settings.title}</a>` : ''}
       </nav>
       <div class="header__back">
@@ -184,7 +184,7 @@ function createAppShell() {
       </a>
       <a href="#/lessons" class="bottom-nav__item" data-view="lessons">
         <span class="material-symbols-outlined">layers</span>
-        <span>${t.nav.lessons}</span>
+        <span>${isGuest() ? t.nav.lessonsGuest : t.nav.lessons}</span>
       </a>
       ${isAdmin() ? `
         <a href="#/settings" class="bottom-nav__item" data-view="settings">

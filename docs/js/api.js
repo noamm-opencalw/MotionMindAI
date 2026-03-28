@@ -3,8 +3,7 @@ import { supabase, getUser, isAdmin, isGuest } from './auth.js';
 // =============================
 // CONFIGURATION
 // =============================
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+const CREW_API_URL = 'http://localhost:8000/api';
 
 // =============================
 // API KEY MANAGEMENT (Supabase app_settings)
@@ -43,213 +42,27 @@ export function hasApiKey() {
 }
 
 // =============================
-// GEMINI DIRECT API CALL
+// CREW AI BACKEND CALLS
 // =============================
-function buildPrompt({ targetAge, gender, focusAreas, durationMinutes, equipment }) {
-  const equipmentLine = equipment && equipment.length > 0
-    ? `- Available equipment: ${equipment.join(', ')}`
-    : '- Available equipment: none (bodyweight only)';
-
-  const genderMap = { male: 'men', female: 'women', mixed: 'mixed group (men and women)' };
-  const genderLine = gender ? `- Target audience: ${genderMap[gender] || gender}` : '';
-
-  const focusLine = Array.isArray(focusAreas)
-    ? `- Focus areas: ${focusAreas.join(', ')}`
-    : `- Focus area: ${focusAreas}`;
-
-  return `You are a certified Pilates and Physical Education instructor.
-Generate a structured lesson plan in valid JSON.
-
-Parameters:
-- Target age group: ${targetAge}
-${genderLine}
-${focusLine}
-- Total duration: ${durationMinutes} minutes
-${equipmentLine}
-
-Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
-{
-  "title": "string (in Hebrew)",
-  "exercises": [
-    {
-      "name": "string (in Hebrew)",
-      "description": "string (in Hebrew)",
-      "durationSeconds": number,
-      "category": "Warm-Up | Core | Strength | Flexibility | Cool-Down",
-      "coachCues": "string (in Hebrew)",
-      "equipment": "string (in Hebrew, which equipment is used, or empty string if none)"
-    }
-  ],
-  "musicRecommendations": [
-    {
-      "title": "string (song name)",
-      "artist": "string (artist name)",
-      "tempo": "slow | medium | fast"
-    }
-  ]
-}
-
-Rules:
-- IMPORTANT: All text fields (title, name, description, coachCues, equipment) MUST be in Hebrew
-- Include 4-8 exercises appropriate for ${targetAge}
-- Total exercise time should fill approximately ${durationMinutes} minutes
-- coachCues should be concise verbal instructions an instructor would say
-- Categories must come from the enum above (keep category values in English)
-- Use ONLY the specified equipment; adapt exercises to available tools
-- Incorporate all focus areas into the workout distribution
-- Each exercise must clearly describe proper form and positioning
-- Include 3-5 music recommendations that match the workout tempo and energy. Include a mix of Israeli/Hebrew songs and international songs. Song titles and artist names should be in their original language (Hebrew for Israeli songs).`;
-}
-
-function buildRegeneratePrompt(exercise, note, lessonContext) {
-  return `You are a certified Pilates and Physical Education instructor.
-Regenerate a SINGLE exercise based on the following context and note.
-
-Original exercise:
-- Name: ${exercise.name}
-- Description: ${exercise.description}
-- Category: ${exercise.category}
-- Duration: ${exercise.durationSeconds} seconds
-- Coach Cues: ${exercise.coachCues}
-
-Lesson context:
-- Age group: ${lessonContext.targetAgeGroup}
-- Focus areas: ${lessonContext.focusAreas || lessonContext.focusArea}
-- Equipment: ${lessonContext.equipment ? lessonContext.equipment.join(', ') : 'none'}
-
-User note/request for changes: ${note}
-
-Return ONLY valid JSON for a single exercise (no markdown, no extra text):
-{
-  "name": "string (in Hebrew)",
-  "description": "string (in Hebrew)",
-  "durationSeconds": number,
-  "category": "Warm-Up | Core | Strength | Flexibility | Cool-Down",
-  "coachCues": "string (in Hebrew)",
-  "equipment": "string (in Hebrew, or empty string)"
-}
-
-Rules:
-- IMPORTANT: All text fields MUST be in Hebrew
-- Keep the same category and similar duration unless the note requests otherwise
-- Adapt the exercise based on the user's note
-- Keep category values in English`;
-}
-
-function buildProgramPrompt(params) {
-  return `You are an elite certified personal trainer and sports scientist.
-Build a comprehensive, periodized training program in valid JSON.
-
-Client Profile:
-- Goal: ${params.goal}${params.goalCustom ? ` (${params.goalCustom})` : ''}
-- Gender: ${params.gender === 'male' ? 'Male' : 'Female'}
-- Age: ${params.age || 'Not specified'}
-- Current weight: ${params.weight ? params.weight + ' kg' : 'Not specified'}
-- Fitness level: ${params.fitnessLevel}
-- Training location: ${params.location}
-- Available equipment: ${params.equipment && params.equipment.length > 0 ? params.equipment.join(', ') : 'bodyweight only'}
-- Training days per week: ${params.daysPerWeek}
-- Session duration: ${params.sessionDuration} minutes
-- Timeframe: ${params.timeframe}
-- Limitations/injuries: ${params.limitations || 'None'}
-
-Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
-{
-  "title": "string (in Hebrew - program title)",
-  "description": "string (in Hebrew - 2-3 sentence overview of the program approach)",
-  "totalWeeks": number,
-  "daysPerWeek": number,
-  "phases": [
-    {
-      "name": "string (in Hebrew - phase name, e.g. שלב התאמה)",
-      "weekStart": number,
-      "weekEnd": number,
-      "focus": "string (in Hebrew - phase focus description)",
-      "intensity": "low | moderate | high | very-high"
-    }
-  ],
-  "weeks": [
-    {
-      "weekNumber": number,
-      "theme": "string (in Hebrew - week theme/focus)",
-      "days": [
-        {
-          "dayNumber": number (1=Sunday, 7=Saturday),
-          "type": "training | rest | active-recovery",
-          "title": "string (in Hebrew - e.g. אימון כוח עליון / יום מנוחה)",
-          "focus": "string (in Hebrew - brief focus description, empty for rest days)",
-          "duration": number (minutes, 0 for rest days),
-          "exercises": [
-            {
-              "name": "string (in Hebrew)",
-              "sets": number,
-              "reps": "string (e.g. '12' or '30 שניות' or '8-12')",
-              "rest": "string (e.g. '60 שניות')",
-              "notes": "string (in Hebrew - form cues)"
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "nutrition": {
-    "calories": "string (in Hebrew - daily calorie recommendation)",
-    "protein": "string (in Hebrew - protein recommendation)",
-    "tips": ["string (in Hebrew - 3-4 nutrition tips)"]
-  },
-  "tips": ["string (in Hebrew - 3-5 general program tips)"]
-}
-
-Rules:
-- IMPORTANT: All text fields MUST be in Hebrew
-- Build a proper periodized program with progressive overload
-- Include rest days and active recovery days appropriately
-- For rest days, set type to "rest", exercises to empty array
-- For active recovery, include light activities (walking, stretching)
-- Adapt exercises to the available equipment and location
-- Consider the client's limitations/injuries in exercise selection
-- Include warm-up and cool-down in each training day
-- Progress intensity gradually across phases
-- For programs longer than 4 weeks, only detail the first 4 weeks fully, then provide a summary pattern for remaining weeks
-- Each training day should have 5-8 exercises
-- Provide realistic and safe progression`;
-}
-
-async function callGemini(prompt) {
+async function callCrew(endpoint, body) {
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('NO_API_KEY');
 
-  const requestBody = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.7,
-      responseMimeType: 'application/json',
-    },
-  };
-
-  const url = `${GEMINI_URL}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${CREW_API_URL}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBody),
+    body: JSON.stringify({ ...body, apiKey }),
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Gemini API error:', response.status, errorText);
-    if (response.status === 400 || response.status === 403) {
-      throw new Error('INVALID_API_KEY');
-    }
-    throw new Error(`Gemini API error: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    const detail = errorData.detail || `API error: ${response.status}`;
+    console.error('Crew API error:', response.status, detail);
+    if (response.status === 400) throw new Error('INVALID_API_KEY');
+    throw new Error(detail);
   }
 
-  const data = await response.json();
-  const jsonText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!jsonText) throw new Error('Empty response from Gemini');
-
-  return JSON.parse(jsonText);
+  return response.json();
 }
 
 // =============================
@@ -260,14 +73,10 @@ export async function testConnection() {
   if (!apiKey) return { ok: false, error: 'NO_API_KEY' };
 
   try {
-    const url = `${GEMINI_URL}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-    const response = await fetch(url, {
+    const response = await fetch(`${CREW_API_URL}/test-connection`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: 'Reply with exactly: OK' }] }],
-        generationConfig: { temperature: 0, maxOutputTokens: 10 },
-      }),
+      body: JSON.stringify({ apiKey }),
     });
 
     if (!response.ok) {
@@ -275,19 +84,49 @@ export async function testConnection() {
     }
 
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return { ok: true, response: text };
+    return { ok: data.success, response: data.message };
   } catch (err) {
     return { ok: false, error: err.message };
   }
 }
 
 // =============================
-// LESSON API (Supabase)
+// GUEST SESSION STORAGE
+// =============================
+const GUEST_LESSONS_KEY = 'guest_lessons';
+
+function getGuestLessons() {
+  try {
+    return JSON.parse(sessionStorage.getItem(GUEST_LESSONS_KEY) || '[]');
+  } catch { return []; }
+}
+
+function saveGuestLesson(lesson) {
+  const lessons = getGuestLessons();
+  lessons.unshift(lesson);
+  sessionStorage.setItem(GUEST_LESSONS_KEY, JSON.stringify(lessons));
+}
+
+function getGuestLessonById(id) {
+  return getGuestLessons().find(l => l.id === id) || null;
+}
+
+function deleteGuestLesson(id) {
+  const lessons = getGuestLessons().filter(l => l.id !== id);
+  sessionStorage.setItem(GUEST_LESSONS_KEY, JSON.stringify(lessons));
+}
+
+// =============================
+// LESSON API (CrewAI + Supabase)
 // =============================
 export async function generateLesson({ targetAge, gender, focusAreas, durationMinutes, equipment }) {
-  const prompt = buildPrompt({ targetAge, gender, focusAreas, durationMinutes, equipment });
-  const plan = await callGemini(prompt);
+  const plan = await callCrew('/generate/lesson', {
+    targetAge,
+    gender,
+    focusAreas: Array.isArray(focusAreas) ? focusAreas : [focusAreas],
+    durationMinutes,
+    equipment: equipment || [],
+  });
 
   const lessonData = {
     title: plan.title,
@@ -297,7 +136,9 @@ export async function generateLesson({ targetAge, gender, focusAreas, durationMi
     durationMinutes,
     equipment: equipment || [],
     musicRecommendations: plan.musicRecommendations || [],
-    instructor: { id: 1, name: 'מאמן AI', specialty: 'פילאטיס וחינוך גופני' },
+    nutritionTips: plan.nutritionTips || [],
+    safetyNotes: plan.safetyNotes || [],
+    instructor: { id: 1, name: 'Spearit! AI Crew', specialty: 'פילאטיס וחינוך גופני' },
     exercises: (plan.exercises || []).map((ex, i) => ({
       id: Date.now() + i,
       name: ex.name,
@@ -310,9 +151,11 @@ export async function generateLesson({ targetAge, gender, focusAreas, durationMi
     })),
   };
 
-  // Guest users can generate but not save history
+  // Guest users: save to sessionStorage (cleared on page refresh)
   if (isGuest()) {
-    return { ...lessonData, id: `guest-${Date.now()}` };
+    const guestLesson = { ...lessonData, id: `guest-${Date.now()}` };
+    saveGuestLesson(guestLesson);
+    return guestLesson;
   }
 
   const { data, error } = await supabase
@@ -333,8 +176,18 @@ export async function regenerateExercise(lessonId, exerciseId, note) {
   if (exerciseIndex === -1) throw new Error('Exercise not found');
 
   const exercise = lesson.exercises[exerciseIndex];
-  const prompt = buildRegeneratePrompt(exercise, note, lesson);
-  const newExercise = await callGemini(prompt);
+
+  const result = await callCrew('/generate/regenerate', {
+    exerciseContext: JSON.stringify(exercise),
+    userNote: note,
+    lessonContext: JSON.stringify({
+      targetAgeGroup: lesson.targetAgeGroup,
+      focusAreas: lesson.focusAreas || lesson.focusArea,
+      equipment: lesson.equipment,
+    }),
+  });
+
+  const newExercise = result.exercise || result;
 
   lesson.exercises[exerciseIndex] = {
     ...lesson.exercises[exerciseIndex],
@@ -387,6 +240,8 @@ export async function reorderExercises(lessonId, exerciseIds) {
 }
 
 export async function getAllLessons() {
+  if (isGuest()) return getGuestLessons();
+
   const { data, error } = await supabase
     .from('lessons')
     .select('*')
@@ -397,6 +252,10 @@ export async function getAllLessons() {
 }
 
 export async function getLessonById(id) {
+  if (isGuest() || String(id).startsWith('guest-')) {
+    return getGuestLessonById(String(id));
+  }
+
   const { data, error } = await supabase
     .from('lessons')
     .select('*')
@@ -407,15 +266,18 @@ export async function getLessonById(id) {
 }
 
 export async function deleteLesson(id) {
+  if (isGuest() || String(id).startsWith('guest-')) {
+    deleteGuestLesson(String(id));
+    return;
+  }
   await supabase.from('lessons').delete().eq('id', id);
 }
 
 // =============================
-// TRAINING PROGRAM API (Supabase)
+// TRAINING PROGRAM API (CrewAI + Supabase)
 // =============================
 export async function generateProgram(params) {
-  const prompt = buildProgramPrompt(params);
-  const plan = await callGemini(prompt);
+  const plan = await callCrew('/generate/program', params);
 
   const programData = {
     createdAt: new Date().toISOString(),
@@ -428,6 +290,7 @@ export async function generateProgram(params) {
     weeks: plan.weeks || [],
     nutrition: plan.nutrition || null,
     tips: plan.tips || [],
+    safetyNotes: plan.safetyNotes || [],
   };
 
   const { data, error } = await supabase

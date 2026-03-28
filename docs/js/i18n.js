@@ -6,6 +6,7 @@ export const t = {
     home: 'בית',
     generate: 'אימונים',
     lessons: 'היסטוריה',
+    lessonsGuest: 'אימונים',
     program: 'תכנון',
   },
 
@@ -16,6 +17,7 @@ export const t = {
     loginWithApple: 'התחבר עם Apple',
     loginAsGuest: 'כניסה כאורח',
     guestHistoryMessage: 'כניסה כאורח אינה מאפשרת שמירת היסטוריה. התחבר כדי לשמור את האימונים שלך.',
+    guestSessionMessage: 'האימונים נשמרים זמנית — הם יימחקו בעת רענון הדף. התחבר כדי לשמור לצמיתות.',
     logout: 'התנתק',
     lockedTitle: 'החשבון שלך נעול',
     lockedDesc: 'אנא פנה למנהל המערכת לפתיחת החשבון.',

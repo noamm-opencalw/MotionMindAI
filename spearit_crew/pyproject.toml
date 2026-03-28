@@ -1,0 +1,17 @@
+[project]
+name = "spearit-crew"
+version = "1.0.0"
+description = "Spearit! AI Fitness Trainer — Multi-agent CrewAI backend"
+requires-python = ">=3.10"
+dependencies = [
+    "crewai[tools]>=0.80.0",
+    "langchain-google-genai>=2.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
